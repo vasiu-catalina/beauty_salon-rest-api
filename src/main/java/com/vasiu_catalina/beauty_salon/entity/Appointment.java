@@ -25,12 +25,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="appointments")
+@Table(name = "appointments")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor
 public class Appointment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,27 +41,27 @@ public class Appointment {
     @NonNull
     @Column(nullable = false)
     private LocalDateTime date;
-    
+
     @NonNull
-    @Column(name="total_price", precision = 10, scale = 2, nullable = false)
+    @Column(name = "total_price", precision = 10, scale = 2, nullable = false)
     private BigDecimal totalPrice;
 
-    @Column(name="created_at", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-    
+
     @JsonIgnore
     @OneToMany(mappedBy = "appointment", orphanRemoval = true)
     private Set<AppointmentService> appointmentServices;
-    
+
     @ManyToOne(optional = false)
-    @JoinColumn(name="client_id", referencedColumnName = "id", nullable = true)
+    @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = true)
     private Client client;
-    
+
     @ManyToOne(optional = false)
-    @JoinColumn(name="employee_id", referencedColumnName = "id", nullable = true)
+    @JoinColumn(name = "employee_id", referencedColumnName = "id", nullable = true)
     private Employee employee;
 
     @PrePersist

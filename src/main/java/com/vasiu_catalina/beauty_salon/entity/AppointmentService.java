@@ -17,25 +17,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="appointment_services")
+@Table(name = "appointment_services")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor
 public class AppointmentService {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NonNull
-    @Column(name="service_price", nullable = false)
+    @Column(name = "service_price", nullable = false)
     private BigDecimal servicePrice;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name="appointment_id", referencedColumnName = "id")
+    @JoinColumn(name = "appointment_id", referencedColumnName = "id")
     private Appointment appointment;
 
     @ManyToOne
-    @JoinColumn(name="service_id", referencedColumnName = "id", nullable = true)
+    @JoinColumn(name = "service_id", referencedColumnName = "id", nullable = true)
     private Service service;
 }

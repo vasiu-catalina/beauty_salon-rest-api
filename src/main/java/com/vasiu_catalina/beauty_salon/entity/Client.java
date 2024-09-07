@@ -4,8 +4,6 @@ import java.util.Set;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -25,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="clients")
+@Table(name = "clients")
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -37,11 +35,11 @@ public class Client {
     private Long id;
 
     @NonNull
-    @Column(name="first_name", nullable = false)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
     @NonNull
-    @Column(name="last_name", nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
     @NonNull
@@ -49,21 +47,21 @@ public class Client {
     private String email;
 
     @NonNull
-    @Column(name="phone_number", nullable = false, unique = true)
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
     @NonNull
     @Column(nullable = false)
     private String address;
 
-    @NonNull 
-    @Column(name="birth_date", nullable = false)
+    @NonNull
+    @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
-    @Column(name="created_at", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @JsonIgnore

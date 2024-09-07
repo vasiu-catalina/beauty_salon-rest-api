@@ -25,19 +25,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="products")
+@Table(name = "products")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor
 public class Product {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NonNull
-    @Column(nullable=false)
+    @Column(nullable = false)
     private String name;
 
     @Min(value = 0)
@@ -48,13 +48,13 @@ public class Product {
     private BigDecimal price;
 
     @NonNull
-    @Column(name="expiry_date")
+    @Column(name = "expiry_date")
     private LocalDate expiryDate;
 
-    @Column(name="created_at", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @JsonIgnore

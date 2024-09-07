@@ -20,12 +20,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="reviews")
+@Table(name = "reviews")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor
 public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,18 +40,18 @@ public class Review {
     @Lob
     private String description;
 
-    @Column(name="created_at", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name="client_id", referencedColumnName = "id", nullable = true)
+    @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = true)
     private Client client;
 
     @ManyToOne
-    @JoinColumn(name="employee_id", referencedColumnName = "id", nullable = true)
+    @JoinColumn(name = "employee_id", referencedColumnName = "id", nullable = true)
     private Employee employee;
 
     @PrePersist

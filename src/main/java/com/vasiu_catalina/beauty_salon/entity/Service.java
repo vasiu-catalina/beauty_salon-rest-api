@@ -4,7 +4,6 @@ import java.util.Set;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -28,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="services")
+@Table(name = "services")
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -51,16 +50,29 @@ public class Service {
     @NonNull
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal price;
-  
+
     @NonNull
     @Column(nullable = false)
     private Integer duration;
 
-    @Column(name="created_at", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "service", orphanRemoval = true)
+    private Set<AppointmentService> appointmentServices;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "services")
+    private Set<Employee> employees;
+
+    @JsonIgnore
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(name = "service_products", joinColumns = @JoinColumn(name = "service_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"))
+    private Set<Product> products;
 
     @PrePersist
     protected void onCreate() {
@@ -73,19 +85,4 @@ public class Service {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "service", orphanRemoval = true)
-    private Set<AppointmentService> appointmentServices;
-
-    @JsonIgnore
-    @ManyToMany(mappedBy = "services")
-    private Set<Employee> employees;
-
-    @JsonIgnore
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name="service_products",
-    joinColumns = @JoinColumn(name="service_id", referencedColumnName = "id"),
-    inverseJoinColumns = @JoinColumn(name="product_id", referencedColumnName = "id"))
-    private Set<Product> products;
-    
 }

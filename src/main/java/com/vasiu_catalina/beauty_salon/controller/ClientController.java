@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vasiu_catalina.beauty_salon.entity.Client;
 import com.vasiu_catalina.beauty_salon.service.ClientService;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<Client> createClient(@RequestBody Client client) {
+    public ResponseEntity<Client> createClient(@RequestBody @Valid Client client) {
         return new ResponseEntity<>(clientService.createClient(client), HttpStatus.CREATED);
     }
 
@@ -44,7 +45,7 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Client> updateClient(@PathVariable Long id, @RequestBody Client client) {
+    public ResponseEntity<Client> updateClient(@PathVariable Long id, @RequestBody @Valid Client client) {
         return new ResponseEntity<>(clientService.updateClient(id, client), HttpStatus.OK);
     }
 

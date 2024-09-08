@@ -4,7 +4,9 @@ import java.util.Set;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vasiu_catalina.beauty_salon.validation.MinAge;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -16,6 +18,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -35,26 +39,33 @@ public class Client {
     private Long id;
 
     @NonNull
+    @NotBlank(message = "First name is required.")
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
     @NonNull
+    @NotBlank(message = "Last Name is required.")
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
     @NonNull
+    @NotBlank(message = "Email is required.")
     @Column(nullable = false, unique = true)
     private String email;
 
     @NonNull
+    @NotBlank(message = "Phone number is required.")
     @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
     @NonNull
+    @NotBlank(message = "Address is required.")
     @Column(nullable = false)
     private String address;
 
     @NonNull
+    @MinAge
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-mm-dd")
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 

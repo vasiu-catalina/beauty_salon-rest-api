@@ -1,12 +1,12 @@
 package com.vasiu_catalina.beauty_salon.service;
 
-import java.util.Set;
+import java.util.List;
 
 import com.vasiu_catalina.beauty_salon.entity.Client;
 
 public interface ClientService {
 
-    Set<Client> getAllClients();
+    List<Client> getAllClients();
 
     Client getClient(Long id);
 

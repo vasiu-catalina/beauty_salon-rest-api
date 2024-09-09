@@ -26,8 +26,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Client getClient(Long id) {
-        Optional<Client> client = clientRepository.findById(id);
-        return unwrappedClient(client, id);
+        return clientRepository.findById(id).orElseThrow(() -> new ClientNotFoundException(id));
     }
 
     @Override
@@ -39,22 +38,21 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Client updateClient(Long id, Client client) {
-        Optional<Client> existingClient = clientRepository.findById(id);
-        Client unwrappedExistingClient = unwrappedClient(existingClient, id);
+        Client existingClient = clientRepository.findById(id).orElseThrow(() -> new ClientNotFoundException(id));;
 
-        if (!unwrappedExistingClient.getEmail().equals(client.getEmail())) {
+        if (!existingClient.getEmail().equals(client.getEmail())) {
             if (existsClientByEmail(client.getEmail())) throw new ClientAlreadyExistsException("Email");
-            unwrappedExistingClient.setEmail(client.getEmail());
+            existingClient.setEmail(client.getEmail());
         }
-        if (!unwrappedExistingClient.getEmail().equals(client.getEmail()))  {
+        if (!existingClient.getEmail().equals(client.getEmail()))  {
             if (existsClientByPhoneNumber(client.getPhoneNumber())) throw new ClientAlreadyExistsException("Phone number");
-            unwrappedExistingClient.setPhoneNumber(client.getPhoneNumber());
+            existingClient.setPhoneNumber(client.getPhoneNumber());
         }
-        unwrappedExistingClient.setFirstName(client.getFirstName());
-        unwrappedExistingClient.setLastName(client.getLastName());
-        unwrappedExistingClient.setBirthDate(client.getBirthDate());
+        existingClient.setFirstName(client.getFirstName());
+        existingClient.setLastName(client.getLastName());
+        existingClient.setBirthDate(client.getBirthDate());
 
-        return clientRepository.save(unwrappedExistingClient);
+        return clientRepository.save(existingClient);
     }
 
     @Override
@@ -70,11 +68,5 @@ public class ClientServiceImpl implements ClientService {
     public boolean existsClientByPhoneNumber(String phoneNumber) {
         Optional<Client> existingClientByPhoneNumber = clientRepository.findByPhoneNumber(phoneNumber);
         return existingClientByPhoneNumber.isPresent();
-    }
-    
-    static Client unwrappedClient(Optional<Client> client, Long id) {
-        if (client.isPresent())
-            return client.get();
-        throw new ClientNotFoundException(id);
     }
 }

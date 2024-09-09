@@ -17,6 +17,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,6 +48,7 @@ public class Client {
     private String lastName;
 
     @NonNull
+    @Email
     @NotBlank(message = "Email is required.")
     @Column(nullable = false, unique = true)
     private String email;

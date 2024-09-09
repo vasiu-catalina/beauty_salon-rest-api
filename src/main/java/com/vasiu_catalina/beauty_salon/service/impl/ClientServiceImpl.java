@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.vasiu_catalina.beauty_salon.entity.Client;
+import com.vasiu_catalina.beauty_salon.exception.ClientAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.ClientRepository;
 import com.vasiu_catalina.beauty_salon.service.ClientService;
@@ -31,8 +32,8 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Client createClient(Client client) {
-        if (existsClientByEmail(client.getEmail())) new RuntimeException("Client with email " + client.getEmail() + " already exists.");
-        if (existsClientByPhoneNumber(client.getPhoneNumber())) new RuntimeException("Client with phone number " + client.getPhoneNumber() + " already exists.");
+        if (existsClientByEmail(client.getEmail())) throw new ClientAlreadyExistsException("Email");
+        if (existsClientByPhoneNumber(client.getPhoneNumber())) throw new ClientAlreadyExistsException("Phone number");
         return clientRepository.save(client);
     }
 
@@ -42,11 +43,11 @@ public class ClientServiceImpl implements ClientService {
         Client unwrappedExistingClient = unwrappedClient(existingClient, id);
 
         if (!unwrappedExistingClient.getEmail().equals(client.getEmail())) {
-            if (existsClientByEmail(client.getEmail())) new RuntimeException("Client with email " + client.getEmail() + " already exists.");
+            if (existsClientByEmail(client.getEmail())) throw new ClientAlreadyExistsException("Email");
             unwrappedExistingClient.setEmail(client.getEmail());
         }
         if (!unwrappedExistingClient.getEmail().equals(client.getEmail()))  {
-            if (existsClientByPhoneNumber(client.getPhoneNumber())) new RuntimeException("Client with phone number " + client.getPhoneNumber() + " already exists.");
+            if (existsClientByPhoneNumber(client.getPhoneNumber())) throw new ClientAlreadyExistsException("Phone number");
             unwrappedExistingClient.setPhoneNumber(client.getPhoneNumber());
         }
         unwrappedExistingClient.setFirstName(client.getFirstName());

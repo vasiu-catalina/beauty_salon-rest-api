@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.time.format.DateTimeParseException;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -18,8 +19,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.vasiu_catalina.beauty_salon.exception.ClientAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.ErrorResponse;
+
+import jakarta.persistence.PersistenceException;
+import jakarta.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
@@ -81,6 +86,15 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         
         ErrorResponse error = new ErrorResponse(errors);
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ClientAlreadyExistsException.class)
+    public ResponseEntity<Object> handleEntityAlreadyExistsExeception(DataIntegrityViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+        
+        ErrorResponse error = new ErrorResponse(errors);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
 }

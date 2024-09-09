@@ -1,4 +1,4 @@
-package com.vasiu_catalina.beauty_salon.exception;
+package com.vasiu_catalina.beauty_salon.exception.client;
 
 public class ClientNotFoundException extends RuntimeException {
     

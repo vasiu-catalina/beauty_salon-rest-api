@@ -1,4 +1,4 @@
-package com.vasiu_catalina.beauty_salon.exception;
+package com.vasiu_catalina.beauty_salon.exception.client;
 
 import org.springframework.dao.DataIntegrityViolationException;
 

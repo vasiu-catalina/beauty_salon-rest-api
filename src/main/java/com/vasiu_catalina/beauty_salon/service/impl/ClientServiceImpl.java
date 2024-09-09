@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.vasiu_catalina.beauty_salon.entity.Client;
-import com.vasiu_catalina.beauty_salon.exception.ClientAlreadyExistsException;
-import com.vasiu_catalina.beauty_salon.exception.ClientNotFoundException;
+import com.vasiu_catalina.beauty_salon.exception.client.ClientAlreadyExistsException;
+import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.ClientRepository;
 import com.vasiu_catalina.beauty_salon.service.ClientService;
 
@@ -17,7 +17,7 @@ import lombok.AllArgsConstructor;
 @Service
 public class ClientServiceImpl implements ClientService {
 
-    ClientRepository clientRepository;
+    private ClientRepository clientRepository;
 
     @Override
     public List<Client> getAllClients() {
@@ -51,6 +51,7 @@ public class ClientServiceImpl implements ClientService {
         existingClient.setFirstName(client.getFirstName());
         existingClient.setLastName(client.getLastName());
         existingClient.setBirthDate(client.getBirthDate());
+        existingClient.setAddress(client.getAddress());
 
         return clientRepository.save(existingClient);
     }
@@ -65,7 +66,7 @@ public class ClientServiceImpl implements ClientService {
         return existingClientByEmail.isPresent();
     }
 
-    public boolean existsClientByPhoneNumber(String phoneNumber) {
+    private boolean existsClientByPhoneNumber(String phoneNumber) {
         Optional<Client> existingClientByPhoneNumber = clientRepository.findByPhoneNumber(phoneNumber);
         return existingClientByPhoneNumber.isPresent();
     }

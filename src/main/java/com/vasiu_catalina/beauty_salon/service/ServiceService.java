@@ -1,13 +1,14 @@
 package com.vasiu_catalina.beauty_salon.service;
 
-import java.util.Set;
+import java.util.List;
 
+import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Product;
 import com.vasiu_catalina.beauty_salon.entity.Service;
 
 public interface ServiceService {
     
-    Set<Service> getAllServices();
+    List<Service> getAllServices();
 
     Service createService(Service service);
 
@@ -17,7 +18,7 @@ public interface ServiceService {
 
     void deleteService(Long id);
 
-    Set<Service> getServicesByEmployee(Long employeeId);
+    List<Employee> getEmployeesByService(Long serviceId);
 
-    Set<Product> getProductsBySalon(Long salonId);
+    List<Product> getProductsByService(Long serviceId);
 }

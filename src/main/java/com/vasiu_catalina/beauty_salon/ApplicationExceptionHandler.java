@@ -19,9 +19,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.vasiu_catalina.beauty_salon.exception.ClientAlreadyExistsException;
-import com.vasiu_catalina.beauty_salon.exception.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.ErrorResponse;
+import com.vasiu_catalina.beauty_salon.exception.client.ClientAlreadyExistsException;
+import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
 
 import jakarta.persistence.PersistenceException;
 import jakarta.validation.ConstraintViolationException;

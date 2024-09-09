@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Product;
 import com.vasiu_catalina.beauty_salon.entity.Service;
+import com.vasiu_catalina.beauty_salon.exception.product.ProductNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.EmployeeRepository;
@@ -30,20 +31,22 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public Service createService(Service service) {
-        if (existsServiceByName(service.getName())) throw new ServiceAlreadyExistsException(service.getName());
+        if (existsServiceByName(service.getName()))
+            throw new ServiceAlreadyExistsException(service.getName());
         return serviceRepository.save(service);
     }
 
     @Override
     public Service getService(Long id) {
-       return serviceRepository.findById(id).orElseThrow(() -> new ServiceNotFoundException(id));
+        return serviceRepository.findById(id).orElseThrow(() -> new ServiceNotFoundException(id));
     }
 
     @Override
     public Service updateService(Long id, Service service) {
         Service existingService = serviceRepository.findById(id).orElseThrow(() -> new ServiceNotFoundException(id));
         if (!existingService.getName().equals(service.getName())) {
-            if (existsServiceByName(service.getName())) throw new ServiceAlreadyExistsException(service.getName());
+            if (existsServiceByName(service.getName()))
+                throw new ServiceAlreadyExistsException(service.getName());
             existingService.setName(service.getName());
         }
         existingService.setDescription(service.getDescription());
@@ -67,9 +70,26 @@ public class ServiceServiceImpl implements ServiceService {
         return (List<Product>) productRepository.findAllByServiceId(serviceId);
     }
 
-    public boolean existsServiceByName(String name) {
+    @Override
+    public Product addProductToService(Long productId, Long serviceId) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
+        Service service = serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
+        service.getProducts().add(product);
+        serviceRepository.save(service);
+        return product;
+    }
+
+    @Override
+    public void deleteProductFromService(Long productId, Long serviceId) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
+        Service service = serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
+        service.getProducts().remove(product);
+        serviceRepository.save(service);
+    }
+
+    private boolean existsServiceByName(String name) {
         Optional<Service> service = serviceRepository.findByName(name);
         return service.isPresent();
     }
-    
+
 }

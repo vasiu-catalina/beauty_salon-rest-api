@@ -21,4 +21,8 @@ public interface ServiceService {
     List<Employee> getEmployeesByService(Long serviceId);
 
     List<Product> getProductsByService(Long serviceId);
+
+    Product addProductToService(Long productId, Long serviceId);
+
+    void deleteProductFromService(Long productId, Long serviceId);
 }

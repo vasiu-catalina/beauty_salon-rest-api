@@ -82,6 +82,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
         Service service = serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
         employee.getServices().add(service);
+        employeeRepository.save(employee);
         return service;
     }
 
@@ -90,6 +91,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
         Service service = serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
         employee.getServices().remove(service);
+        employeeRepository.save(employee);
     }
 
     private boolean existsEmployeeByEmail(String email) {

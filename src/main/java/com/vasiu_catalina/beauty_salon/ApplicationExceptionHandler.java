@@ -23,8 +23,6 @@ import com.vasiu_catalina.beauty_salon.exception.ErrorResponse;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
 
-import jakarta.persistence.PersistenceException;
-import jakarta.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {

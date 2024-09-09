@@ -12,11 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.vasiu_catalina.beauty_salon.exception.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.ErrorResponse;
 
 @ControllerAdvice
@@ -68,6 +70,17 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 
         ErrorResponse errorResponse = new ErrorResponse(errors);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(ClientNotFoundException.class)
+    public ResponseEntity<Object> handleResourceNotFoundException(RuntimeException ex) {
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+        
+        ErrorResponse error = new ErrorResponse(errors);
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
 }

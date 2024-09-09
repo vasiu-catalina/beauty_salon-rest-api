@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.vasiu_catalina.beauty_salon.entity.Client;
+import com.vasiu_catalina.beauty_salon.exception.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.ClientRepository;
 import com.vasiu_catalina.beauty_salon.service.ClientService;
 
@@ -73,6 +74,6 @@ public class ClientServiceImpl implements ClientService {
     static Client unwrappedClient(Optional<Client> client, Long id) {
         if (client.isPresent())
             return client.get();
-        throw new RuntimeException("Client with id " + id + " was not found.");
+        throw new ClientNotFoundException(id);
     }
 }

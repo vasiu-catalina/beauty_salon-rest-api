@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vasiu_catalina.beauty_salon.validation.MinAge;
+import com.vasiu_catalina.beauty_salon.validation.minAge.MinAge;
+import com.vasiu_catalina.beauty_salon.validation.validDateFormat.ValidDateFormat;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,7 +20,6 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -64,8 +64,7 @@ public class Client {
     private String address;
 
     @NonNull
-    @MinAge
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-mm-dd")
+    @MinAge(18)
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 

@@ -1,16 +1,19 @@
-package com.vasiu_catalina.beauty_salon.validation.validators;
+package com.vasiu_catalina.beauty_salon.validation.minAge;
 
 import java.time.LocalDate;
 import java.time.Period;
-
-import com.vasiu_catalina.beauty_salon.validation.MinAge;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class MinAgeValidator implements ConstraintValidator<MinAge, LocalDate> {
 
-    private static final int MIN_AGE = 14;
+    private int minAge;
+
+    @Override
+    public void initialize(MinAge constraintAnnotation) {
+        this.minAge = constraintAnnotation.value();
+    }
 
     @Override
     public boolean isValid(LocalDate birthDate, ConstraintValidatorContext context) {
@@ -18,6 +21,6 @@ public class MinAgeValidator implements ConstraintValidator<MinAge, LocalDate> {
             return false;
         }
         int age = Period.between(birthDate, LocalDate.now()).getYears();
-        return MIN_AGE <= age;
+        return age >= minAge;
     }
 }

@@ -1,6 +1,4 @@
-package com.vasiu_catalina.beauty_salon.validation;
-
-import com.vasiu_catalina.beauty_salon.validation.validators.MinAgeValidator;
+package com.vasiu_catalina.beauty_salon.validation.validDateFormat;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,10 +10,9 @@ import jakarta.validation.Payload;
 
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = MinAgeValidator.class)
-public @interface MinAge {
-    String message() default "Minimum age is 14.";
+@Constraint(validatedBy = ValidDateFormatValidator.class)
+public @interface ValidDateFormat {
+    String message() default "Invalid date format provided. Please use yyyy=MM-dd.";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
-

@@ -4,10 +4,8 @@ import java.util.Set;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vasiu_catalina.beauty_salon.validation.minAge.MinAge;
-import com.vasiu_catalina.beauty_salon.validation.validDateFormat.ValidDateFormat;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

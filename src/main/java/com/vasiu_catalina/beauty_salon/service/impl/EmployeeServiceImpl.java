@@ -1,5 +1,6 @@
 package com.vasiu_catalina.beauty_salon.service.impl;
 
+import java.util.Set;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +22,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeRepository employeeRepository;
     private ServiceRepository serviceRepository;
 
-
     @Override
     public List<Employee> getAllEmployees() {
         return (List<Employee>) employeeRepository.findAll();
@@ -34,10 +34,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee createEmployee(Employee employee) {
+
         if (existsEmployeeByEmail(employee.getEmail()))
             throw new EmployeeAlreadyExistsException("Email");
+
         if (existsEmployeeByPhoneNumber(employee.getPhoneNumber()))
             throw new EmployeeAlreadyExistsException("Phone number");
+
         return employeeRepository.save(employee);
     }
 
@@ -51,18 +54,20 @@ public class EmployeeServiceImpl implements EmployeeService {
                 throw new EmployeeAlreadyExistsException("Email");
             existingemployee.setEmail(employee.getEmail());
         }
+
         if (!existingemployee.getEmail().equals(employee.getEmail())) {
             if (existsEmployeeByPhoneNumber(employee.getPhoneNumber()))
                 throw new EmployeeAlreadyExistsException("Phone number");
             existingemployee.setPhoneNumber(employee.getPhoneNumber());
         }
+
         existingemployee.setFirstName(employee.getFirstName());
         existingemployee.setLastName(employee.getLastName());
         existingemployee.setBirthDate(employee.getBirthDate());
         existingemployee.setAddress(employee.getAddress());
         existingemployee.setRole(employee.getRole());
-        existingemployee.setSpecialization(employee.getSpecialization());
         existingemployee.setSalary(employee.getSalary());
+        existingemployee.setSpecialization(employee.getSpecialization());
 
         return employeeRepository.save(existingemployee);
     }
@@ -73,23 +78,25 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<Service> getServicesByEmployee(Long id) {
-        return (List<Service>) serviceRepository.findAllByEmployeeId(id);
+    public Set<Service> getServicesByEmployee(Long id) {
+        Employee employee = this.getEmployee(id);
+        return employee.getServices();
     }
 
     @Override
-    public Service addServiceToEmployee(Long serviceId, Long employeeId) {
-        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
-        Service service = serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
+    public Employee addServiceToEmployee(Long serviceId, Long employeeId) {
+        Employee employee = this.getEmployee(employeeId);
+        Service service = this.getService(serviceId);
+
         employee.getServices().add(service);
-        employeeRepository.save(employee);
-        return service;
+        return employeeRepository.save(employee);
     }
 
     @Override
     public void deleteServiceFromEmployee(Long serviceId, Long employeeId) {
-        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
-        Service service = serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
+        Employee employee = this.getEmployee(employeeId);
+        Service service = this.getService(serviceId);
+
         employee.getServices().remove(service);
         employeeRepository.save(employee);
     }
@@ -102,5 +109,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     private boolean existsEmployeeByPhoneNumber(String phoneNumber) {
         Optional<Employee> existingEmployeeByPhoneNumber = employeeRepository.findByPhoneNumber(phoneNumber);
         return existingEmployeeByPhoneNumber.isPresent();
+    }
+
+    private Service getService(Long serviceId) {
+        return serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
     }
 }

@@ -38,16 +38,18 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Client updateClient(Long id, Client client) {
-        Client existingClient = clientRepository.findById(id).orElseThrow(() -> new ClientNotFoundException(id));;
+        Client existingClient = this.getClient(id);
 
         if (!existingClient.getEmail().equals(client.getEmail())) {
             if (existsClientByEmail(client.getEmail())) throw new ClientAlreadyExistsException("Email");
             existingClient.setEmail(client.getEmail());
         }
+
         if (!existingClient.getEmail().equals(client.getEmail()))  {
             if (existsClientByPhoneNumber(client.getPhoneNumber())) throw new ClientAlreadyExistsException("Phone number");
             existingClient.setPhoneNumber(client.getPhoneNumber());
         }
+        
         existingClient.setFirstName(client.getFirstName());
         existingClient.setLastName(client.getLastName());
         existingClient.setBirthDate(client.getBirthDate());

@@ -22,9 +22,14 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.vasiu_catalina.beauty_salon.exception.ErrorResponse;
+import com.vasiu_catalina.beauty_salon.exception.appointment.AppointmentAlreadyExistsException;
+import com.vasiu_catalina.beauty_salon.exception.appointment.AppointmentNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
+import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeNotFoundException;
+import com.vasiu_catalina.beauty_salon.exception.product.ProductNotFoundException;
+import com.vasiu_catalina.beauty_salon.exception.service.ServiceAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
 
 @ControllerAdvice
@@ -105,8 +110,13 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>( new ErrorResponse(errors), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ ClientNotFoundException.class, EmployeeNotFoundException.class,
-            ServiceNotFoundException.class })
+    @ExceptionHandler({ 
+        ClientNotFoundException.class, 
+        EmployeeNotFoundException.class,
+        ServiceNotFoundException.class, 
+        AppointmentNotFoundException.class,
+        ProductNotFoundException.class
+     })
     public ResponseEntity<Object> handleResourceNotFoundException(RuntimeException ex) {
 
         Map<String, String> errors = new HashMap<>();
@@ -116,7 +126,12 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ClientAlreadyExistsException.class)
+    @ExceptionHandler({
+        ClientAlreadyExistsException.class,
+        EmployeeAlreadyExistsException.class,
+        ServiceAlreadyExistsException.class,
+        AppointmentAlreadyExistsException.class
+    })
     public ResponseEntity<Object> handleEntityAlreadyExistsExeception(DataIntegrityViolationException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", ex.getMessage());

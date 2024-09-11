@@ -102,4 +102,9 @@ public class ServiceServiceImpl implements ServiceService {
         return productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
     }
 
+    static Service unwrappedService(Optional<Service> service, Long id) {
+         if (service.isPresent()) return service.get();
+         throw new ServiceNotFoundException(id);
+    }
+
 }

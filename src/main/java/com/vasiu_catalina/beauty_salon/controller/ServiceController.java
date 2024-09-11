@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/services")
+@RequestMapping("/api/v1/services")
 public class ServiceController {
 
     private ServiceService serviceService;

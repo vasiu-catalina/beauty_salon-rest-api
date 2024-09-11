@@ -2,11 +2,11 @@ package com.vasiu_catalina.beauty_salon.entity;
 
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,6 +18,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -25,7 +28,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "appointments",  uniqueConstraints={
+    @UniqueConstraint(columnNames = {"client_id", "employee_id", "date"})
+})
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -39,6 +44,7 @@ public class Appointment {
     private String status = "pending";
 
     @NonNull
+    @Future(message = "Appointment cannot be in the past.")
     @Column(nullable = false)
     private LocalDateTime date;
 
@@ -52,9 +58,8 @@ public class Appointment {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "appointment", orphanRemoval = true)
-    private Set<AppointmentService> appointmentServices;
+    @OneToMany(mappedBy = "appointment", cascade =  CascadeType.ALL, orphanRemoval = true)
+    private Set<AppointmentService> services;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = true)

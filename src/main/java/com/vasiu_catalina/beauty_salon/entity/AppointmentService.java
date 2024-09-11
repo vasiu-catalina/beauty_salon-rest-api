@@ -2,6 +2,8 @@ package com.vasiu_catalina.beauty_salon.entity;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,6 +34,7 @@ public class AppointmentService {
     @Column(name = "service_price", nullable = false)
     private BigDecimal servicePrice;
 
+    @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "appointment_id", referencedColumnName = "id")
     private Appointment appointment;

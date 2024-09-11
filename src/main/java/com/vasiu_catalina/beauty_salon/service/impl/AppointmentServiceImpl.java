@@ -14,10 +14,7 @@ import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Service;
 import com.vasiu_catalina.beauty_salon.exception.appointment.AppointmentAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.appointment.AppointmentNotFoundException;
-import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
-import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.AppointmentRepository;
-import com.vasiu_catalina.beauty_salon.repository.AppointmentServiceRepository;
 import com.vasiu_catalina.beauty_salon.repository.ClientRepository;
 import com.vasiu_catalina.beauty_salon.repository.EmployeeRepository;
 import com.vasiu_catalina.beauty_salon.repository.ServiceRepository;
@@ -34,7 +31,6 @@ public class AppointmentServiceImpl implements IAppointmentService {
     private EmployeeRepository employeeRepository;
     private ClientRepository clientRepository;
     private ServiceRepository serviceRepository;
-    private AppointmentServiceRepository appointmentServiceRepository;
 
     @Override
     public List<Appointment> getAllAppointments() {
@@ -153,17 +149,21 @@ public class AppointmentServiceImpl implements IAppointmentService {
     }
 
     private Client getClient(Long clientId) {
-        return clientRepository.findById(clientId).orElseThrow(() -> new ClientNotFoundException(clientId));
+        Optional<Client> client = clientRepository.findById(clientId);
+        return ClientServiceImpl.unwrappedClient(client, clientId);
     }
 
     private Employee getEmployee(Long employeeId) {
-        return employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
+        Optional<Employee> employee = employeeRepository.findById(employeeId);
+        return EmployeeServiceImpl.unwrappedEmployee(employee, employeeId);
     }
 
     static Appointment unwrappedAppointment(Optional<Appointment> appointment, Long clientId, Long employeeId,
             LocalDateTime date) {
+
         if (appointment.isPresent())
             return appointment.get();
+
         throw new AppointmentNotFoundException(clientId, employeeId, date);
     }
 

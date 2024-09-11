@@ -103,8 +103,9 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     static Service unwrappedService(Optional<Service> service, Long id) {
-         if (service.isPresent()) return service.get();
-         throw new ServiceNotFoundException(id);
+        if (service.isPresent())
+            return service.get();
+        throw new ServiceNotFoundException(id);
     }
 
 }

@@ -8,7 +8,6 @@ import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Service;
 import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeNotFoundException;
-import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.EmployeeRepository;
 import com.vasiu_catalina.beauty_salon.repository.ServiceRepository;
 import com.vasiu_catalina.beauty_salon.service.EmployeeService;
@@ -29,7 +28,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee getEmployee(Long id) {
-        return employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException(id));
+        Optional<Employee> employee = employeeRepository.findById(id);
+        return unwrappedEmployee(employee, id);
     }
 
     @Override
@@ -50,14 +50,18 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(() -> new EmployeeNotFoundException(id));
 
         if (!existingemployee.getEmail().equals(employee.getEmail())) {
+
             if (existsEmployeeByEmail(employee.getEmail()))
                 throw new EmployeeAlreadyExistsException("Email");
+
             existingemployee.setEmail(employee.getEmail());
         }
 
         if (!existingemployee.getEmail().equals(employee.getEmail())) {
+
             if (existsEmployeeByPhoneNumber(employee.getPhoneNumber()))
                 throw new EmployeeAlreadyExistsException("Phone number");
+
             existingemployee.setPhoneNumber(employee.getPhoneNumber());
         }
 
@@ -85,6 +89,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee addServiceToEmployee(Long serviceId, Long employeeId) {
+
         Employee employee = this.getEmployee(employeeId);
         Service service = this.getService(serviceId);
 
@@ -94,6 +99,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void deleteServiceFromEmployee(Long serviceId, Long employeeId) {
+
         Employee employee = this.getEmployee(employeeId);
         Service service = this.getService(serviceId);
 
@@ -112,6 +118,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     private Service getService(Long serviceId) {
-        return serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
+        Optional<Service> service = serviceRepository.findById(serviceId);
+        return ServiceServiceImpl.unwrappedService(service, serviceId);
+    }
+
+    static Employee unwrappedEmployee(Optional<Employee> employee, Long id) {
+        if (employee.isPresent())
+            return employee.get();
+        throw new EmployeeNotFoundException(id);
     }
 }

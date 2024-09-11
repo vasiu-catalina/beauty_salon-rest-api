@@ -1,6 +1,6 @@
 package com.vasiu_catalina.beauty_salon;
 
-import java.util.Optional;
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.HashMap;
 import java.time.format.DateTimeParseException;
@@ -18,11 +18,14 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.vasiu_catalina.beauty_salon.exception.ErrorResponse;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
-
+import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeNotFoundException;
+import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
 
 @ControllerAdvice
 public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
@@ -42,46 +45,73 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>(new ErrorResponse(errors), status);
     }
 
-
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex, 
-            org.springframework.http.HttpHeaders headers, 
-            HttpStatusCode status, 
+            HttpMessageNotReadableException ex,
+            org.springframework.http.HttpHeaders headers,
+            HttpStatusCode status,
             WebRequest request) {
 
         Map<String, String> errors = new HashMap<>();
-        String type;
-        String message;
+        String type = "error";
+        String message = "Invalid request body provided.";
 
         Throwable cause = ex.getCause();
-        if ( ex.getCause()instanceof InvalidFormatException) {
-            if (ex.getCause().getCause() instanceof DateTimeParseException) {
-                type = "date";
-                message = "Invalid date provided. Expected format is YYYY-MM-DD.";
-            } else {
-                type = "error";
-                message = "Invalid input: " + (ex.getCause().getCause() != null ? ex.getCause().getCause().getMessage() : "Unknown cause");
-            }
-        } else {
-            type = "general";
-            message = Optional.ofNullable(cause)
-            .map(Throwable::getMessage)
-            .orElse("Invalid input data");
-        }
-        errors.put(type, message);
 
-        ErrorResponse errorResponse = new ErrorResponse(errors);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        if (cause instanceof InvalidFormatException ife) {
+            type = ife.getPath()
+            .stream()
+            .map(ref -> ref.getFieldName())
+            .findFirst()
+            .orElse("unknown field");
+
+            if (ife.getTargetType() == BigDecimal.class) {
+                if (ife.getValue() != null && ife.getValue().toString().trim().isEmpty()) {
+                    message = "Field '" + type + "' cannot be empty. A valid number is required.";
+                } else {
+                    message = "Invalid number format.";
+                }
+            } else if (ife.getCause() instanceof DateTimeParseException) {
+                message = "Invalid date provided. Expected format is YYYY-MM-DD.";
+
+            }  else if (ife.getCause() instanceof JsonParseException) {
+                message = "Invalid format provided. " + ife.getCause().getMessage();
+
+            } else {
+                message = ife.getOriginalMessage();
+            }
+        } else if (cause instanceof JsonMappingException jpe) {
+            type = jpe.getPath()
+            .stream()
+            .map(ref -> ref.getFieldName())
+            .findFirst()
+            .orElse("unknown field");
+
+            message = cause.getCause().getMessage();
+
+            if (message.contains("salary")) {
+                message = "Salary is required.";
+
+            } else if (message.contains("price")) {
+                message = "Price is required.";
+
+            } else if (message.contains("duration")) {
+                message = "Duration is required.";
+            }
+
+        }
+        
+        errors.put(type, message);
+        return new ResponseEntity<>( new ErrorResponse(errors), HttpStatus.BAD_REQUEST);
     }
 
-
-    @ExceptionHandler(ClientNotFoundException.class)
+    @ExceptionHandler({ ClientNotFoundException.class, EmployeeNotFoundException.class,
+            ServiceNotFoundException.class })
     public ResponseEntity<Object> handleResourceNotFoundException(RuntimeException ex) {
 
         Map<String, String> errors = new HashMap<>();
         errors.put("message", ex.getMessage());
-        
+
         ErrorResponse error = new ErrorResponse(errors);
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
@@ -90,7 +120,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
     public ResponseEntity<Object> handleEntityAlreadyExistsExeception(DataIntegrityViolationException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", ex.getMessage());
-        
+
         ErrorResponse error = new ErrorResponse(errors);
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }

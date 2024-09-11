@@ -2,11 +2,14 @@ package com.vasiu_catalina.beauty_salon.entity;
 
 import java.util.Set;
 
+import org.springframework.format.annotation.NumberFormat;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vasiu_catalina.beauty_salon.validation.minAge.MinAge;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,6 +24,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -40,26 +49,33 @@ public class Employee {
     private Long id;
 
     @NonNull
+    @NotBlank(message = "First name is required.")
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
     @NonNull
+    @NotBlank(message = "Last name is required.")
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
     @NonNull
+    @NotBlank(message = "Email is required.")
+    @Email(message = "Email is invalid.")
     @Column(nullable = false, unique = true)
     private String email;
 
     @NonNull
+    @NotBlank(message = "Phone number is required.")
     @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
     @NonNull
+    @NotBlank(message = "Address is required.")
     @Column(nullable = false)
     private String address;
 
     @NonNull
+    @MinAge(18)
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
@@ -68,10 +84,15 @@ public class Employee {
     private String role = "employee";
 
     @NonNull
+    @NotBlank(message = "Specialization is required.")
     @Column(nullable = false)
     private String specialization;
 
     @NonNull
+    @NotNull(message = "Salary is required.")
+    @Digits(integer = 10, fraction = 2, message = "Salary has invalid currency format.")
+    @DecimalMin(value = "0.00", inclusive = true, message = "Salary must be greater or equal than 0.")
+    @NumberFormat(style = NumberFormat.Style.CURRENCY)
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal salary;
 

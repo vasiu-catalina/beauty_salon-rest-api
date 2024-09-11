@@ -1,6 +1,9 @@
 package com.vasiu_catalina.beauty_salon.entity;
 
 import java.util.Set;
+
+import org.springframework.format.annotation.NumberFormat;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -20,6 +23,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -39,19 +46,27 @@ public class Service {
     private Long id;
 
     @NonNull
+    @NotBlank(message = "Name is required.")
     @Column(nullable = false)
     private String name;
 
     @NonNull
+    @NotBlank(message = "Description is required.")
     @Column(nullable = false)
     @Lob // large object
     private String description;
 
     @NonNull
+    @NotNull(message = "Price is required.")
+    @Digits(integer = 10, fraction = 2, message = "Price has invalid currency format.")
+    @DecimalMin(value = "0.00", inclusive = true, message = "Price must be greater or equal than 0.")
+    @NumberFormat(style = NumberFormat.Style.CURRENCY)
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal price;
 
     @NonNull
+    @NotNull(message = "Duration is required.")
+    @Digits(integer = 10, fraction = 0, message = "Duration has invalid format.")
     @Column(nullable = false)
     private Integer duration;
 

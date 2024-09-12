@@ -1,6 +1,9 @@
 package com.vasiu_catalina.beauty_salon.entity;
 
 import java.util.Set;
+
+import org.springframework.format.annotation.NumberFormat;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,7 +20,12 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -37,18 +45,26 @@ public class Product {
     private Long id;
 
     @NonNull
-    @Column(nullable = false)
+    @NotBlank(message = "Name is required.")
+    @Column(nullable = false, unique = true)
     private String name;
 
-    @Min(value = 0)
+    @Min(value = 0, message = "Quantity must be at least 0.")
     private Integer quantity = 0;
 
     @NonNull
+    @NotNull(message = "Price is required.")
+    @Digits(integer = 10, fraction = 2, message = "Price has invalid currency format.")
+    @DecimalMin(value = "0.00", inclusive = true, message = "Price must be greater or equal than 0.")
+    @NumberFormat(style = NumberFormat.Style.CURRENCY)
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal price;
 
+    
     @NonNull
-    @Column(name = "expiry_date")
+    @NotNull(message = "Expiry date is required")
+    @Future(message = "Expiry date cannot be in the past.")
+    @Column(name = "expiry_date", nullable = false)
     private LocalDate expiryDate;
 
     @Column(name = "created_at", nullable = false)

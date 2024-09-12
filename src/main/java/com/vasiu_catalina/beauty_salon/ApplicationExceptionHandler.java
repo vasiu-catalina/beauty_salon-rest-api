@@ -1,6 +1,7 @@
 package com.vasiu_catalina.beauty_salon;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.time.format.DateTimeParseException;
@@ -14,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -28,6 +30,7 @@ import com.vasiu_catalina.beauty_salon.exception.client.ClientAlreadyExistsExcep
 import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeNotFoundException;
+import com.vasiu_catalina.beauty_salon.exception.product.ProductAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.product.ProductNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
@@ -104,18 +107,17 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
                 message = "Duration is required.";
             }
 
-        }
-        
+        } 
         errors.put(type, message);
         return new ResponseEntity<>( new ErrorResponse(errors), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({ 
+        AppointmentNotFoundException.class,
         ClientNotFoundException.class, 
         EmployeeNotFoundException.class,
-        ServiceNotFoundException.class, 
-        AppointmentNotFoundException.class,
-        ProductNotFoundException.class
+        ProductNotFoundException.class,
+        ServiceNotFoundException.class
      })
     public ResponseEntity<Object> handleResourceNotFoundException(RuntimeException ex) {
 
@@ -127,10 +129,11 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
     }
 
     @ExceptionHandler({
+        AppointmentAlreadyExistsException.class,
         ClientAlreadyExistsException.class,
         EmployeeAlreadyExistsException.class,
-        ServiceAlreadyExistsException.class,
-        AppointmentAlreadyExistsException.class
+        ProductAlreadyExistsException.class,
+        ServiceAlreadyExistsException.class
     })
     public ResponseEntity<Object> handleEntityAlreadyExistsExeception(DataIntegrityViolationException ex) {
         Map<String, String> errors = new HashMap<>();

@@ -1,7 +1,6 @@
 package com.vasiu_catalina.beauty_salon;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.time.format.DateTimeParseException;
@@ -15,32 +14,30 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.NonNull;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.vasiu_catalina.beauty_salon.exception.ErrorResponse;
-import com.vasiu_catalina.beauty_salon.exception.appointment.AppointmentAlreadyExistsException;
-import com.vasiu_catalina.beauty_salon.exception.appointment.AppointmentNotFoundException;
-import com.vasiu_catalina.beauty_salon.exception.client.ClientAlreadyExistsException;
-import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
-import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeAlreadyExistsException;
-import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeNotFoundException;
-import com.vasiu_catalina.beauty_salon.exception.product.ProductAlreadyExistsException;
-import com.vasiu_catalina.beauty_salon.exception.product.ProductNotFoundException;
-import com.vasiu_catalina.beauty_salon.exception.service.ServiceAlreadyExistsException;
-import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
+import com.vasiu_catalina.beauty_salon.exception.appointment.*;
+import com.vasiu_catalina.beauty_salon.exception.client.*;
+import com.vasiu_catalina.beauty_salon.exception.employee.*;
+import com.vasiu_catalina.beauty_salon.exception.product.*;
+import com.vasiu_catalina.beauty_salon.exception.service.*;
 
 @ControllerAdvice
 public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            @NonNull MethodArgumentNotValidException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
 
         Map<String, String> errors = new HashMap<>();
 
@@ -55,10 +52,10 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex,
-            org.springframework.http.HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
+            @NonNull HttpMessageNotReadableException ex,
+            @NonNull org.springframework.http.HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
 
         Map<String, String> errors = new HashMap<>();
         String type = "error";
@@ -68,10 +65,10 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 
         if (cause instanceof InvalidFormatException ife) {
             type = ife.getPath()
-            .stream()
-            .map(ref -> ref.getFieldName())
-            .findFirst()
-            .orElse("unknown field");
+                    .stream()
+                    .map(ref -> ref.getFieldName())
+                    .findFirst()
+                    .orElse("unknown field");
 
             if (ife.getTargetType() == BigDecimal.class) {
                 if (ife.getValue() != null && ife.getValue().toString().trim().isEmpty()) {
@@ -82,7 +79,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
             } else if (ife.getCause() instanceof DateTimeParseException) {
                 message = "Invalid date provided. Expected format is YYYY-MM-DD.";
 
-            }  else if (ife.getCause() instanceof JsonParseException) {
+            } else if (ife.getCause() instanceof JsonParseException) {
                 message = "Invalid format provided. " + ife.getCause().getMessage();
 
             } else {
@@ -90,10 +87,10 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
             }
         } else if (cause instanceof JsonMappingException jpe) {
             type = jpe.getPath()
-            .stream()
-            .map(ref -> ref.getFieldName())
-            .findFirst()
-            .orElse("unknown field");
+                    .stream()
+                    .map(ref -> ref.getFieldName())
+                    .findFirst()
+                    .orElse("unknown field");
 
             message = cause.getCause().getMessage();
 
@@ -107,18 +104,18 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
                 message = "Duration is required.";
             }
 
-        } 
+        }
         errors.put(type, message);
-        return new ResponseEntity<>( new ErrorResponse(errors), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ErrorResponse(errors), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ 
-        AppointmentNotFoundException.class,
-        ClientNotFoundException.class, 
-        EmployeeNotFoundException.class,
-        ProductNotFoundException.class,
-        ServiceNotFoundException.class
-     })
+    @ExceptionHandler({
+            AppointmentNotFoundException.class,
+            ClientNotFoundException.class,
+            EmployeeNotFoundException.class,
+            ProductNotFoundException.class,
+            ServiceNotFoundException.class
+    })
     public ResponseEntity<Object> handleResourceNotFoundException(RuntimeException ex) {
 
         Map<String, String> errors = new HashMap<>();
@@ -129,11 +126,11 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
     }
 
     @ExceptionHandler({
-        AppointmentAlreadyExistsException.class,
-        ClientAlreadyExistsException.class,
-        EmployeeAlreadyExistsException.class,
-        ProductAlreadyExistsException.class,
-        ServiceAlreadyExistsException.class
+            AppointmentAlreadyExistsException.class,
+            ClientAlreadyExistsException.class,
+            EmployeeAlreadyExistsException.class,
+            ProductAlreadyExistsException.class,
+            ServiceAlreadyExistsException.class
     })
     public ResponseEntity<Object> handleEntityAlreadyExistsExeception(DataIntegrityViolationException ex) {
         Map<String, String> errors = new HashMap<>();

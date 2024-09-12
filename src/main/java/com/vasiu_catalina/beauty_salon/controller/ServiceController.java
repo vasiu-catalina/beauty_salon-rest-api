@@ -70,6 +70,8 @@ public class ServiceController {
         return new ResponseEntity<>(serviceService.addProductToService(productId, serviceId), HttpStatus.OK);
     }
 
+
+    @DeleteMapping("/{serviceId}/products/{productId}")
     public ResponseEntity<HttpStatus> deleteProductFromService(@PathVariable Long serviceId, @PathVariable Long productId) {
         serviceService.deleteProductFromService(productId, serviceId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

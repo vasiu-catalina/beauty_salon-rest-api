@@ -7,7 +7,6 @@ import java.util.Optional;
 import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Product;
 import com.vasiu_catalina.beauty_salon.entity.Service;
-import com.vasiu_catalina.beauty_salon.exception.product.ProductNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.ProductRepository;
@@ -60,6 +59,7 @@ public class ServiceServiceImpl implements IServiceService {
 
     @Override
     public void deleteService(Long id) {
+        this.getService(id);
         serviceRepository.deleteById(id);
     }
 
@@ -99,7 +99,8 @@ public class ServiceServiceImpl implements IServiceService {
     }
 
     private Product getProduct(Long productId) {
-        return productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
+        Optional<Product> product = productRepository.findById(productId);
+        return ProductServiceImpl.unwrappedProduct(product, productId);
     }
 
     static Service unwrappedService(Optional<Service> service, Long id) {

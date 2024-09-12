@@ -5,7 +5,7 @@ import java.util.Set;
 import com.vasiu_catalina.beauty_salon.entity.Product;
 import com.vasiu_catalina.beauty_salon.entity.Service;
 
-public interface ProductService {
+public interface IProductService {
     
     Set<Product> getAllProducts();
 

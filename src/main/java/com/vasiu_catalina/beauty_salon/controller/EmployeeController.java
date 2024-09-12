@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Service;
-import com.vasiu_catalina.beauty_salon.service.EmployeeService;
+import com.vasiu_catalina.beauty_salon.service.IEmployeeService;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/v1/employees")
 public class EmployeeController {
 
-    private EmployeeService employeeService;
+    private IEmployeeService employeeService;
 
     @GetMapping
     public ResponseEntity<List<Employee>> getAllEmployees() {

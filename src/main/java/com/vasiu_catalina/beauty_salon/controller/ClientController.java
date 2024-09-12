@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vasiu_catalina.beauty_salon.entity.Client;
-import com.vasiu_catalina.beauty_salon.service.ClientService;
+import com.vasiu_catalina.beauty_salon.service.IClientService;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/api/v1/clients")
 public class ClientController {
 
-    ClientService clientService;
+    IClientService clientService;
     
     @GetMapping
     public ResponseEntity<List<Client>> getAllClients() {

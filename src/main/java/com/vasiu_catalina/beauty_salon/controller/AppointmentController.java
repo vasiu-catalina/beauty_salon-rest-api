@@ -41,20 +41,22 @@ public class AppointmentController {
                 HttpStatus.CREATED);
     }
 
-    @GetMapping("/employees/{employeeId}/clients/{clientId}/?date={date}")
-    public ResponseEntity<Appointment> getAppointment(@PathVariable Long employeeId, @PathVariable Long clientId,
-            @RequestParam LocalDateTime date) {
-        return new ResponseEntity<>(appointmentService.getAppointment(clientId, employeeId, date), HttpStatus.OK);
+    @GetMapping("/employees/{employeeId}/clients/{clientId}")
+    public ResponseEntity<Object> getAppointment(@PathVariable Long employeeId, @PathVariable Long clientId,
+            @RequestParam(required = false) LocalDateTime date) {
+        Object responseBody = (date != null) ? appointmentService.getAppointment(clientId, employeeId, date) : 
+        appointmentService.getAppointmentsByClientAndEmployee(clientId, employeeId);
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
-    @PutMapping("/employees/{employeeId}/clients/{clientId}/?date={date}")
+    @PutMapping("/employees/{employeeId}/clients/{clientId}")
     public ResponseEntity<Appointment> updateAppointment(@PathVariable Long employeeId, @PathVariable Long clientId,
             @RequestParam LocalDateTime date, @RequestBody Appointment appointment) {
         return new ResponseEntity<>(appointmentService.updateAppointment(clientId, employeeId, date, appointment),
                 HttpStatus.OK);
     }
 
-    @DeleteMapping("/employees/{employeeId}/clients/{clientId}/?date={date}")
+    @DeleteMapping("/employees/{employeeId}/clients/{clientId}")
     public ResponseEntity<HttpStatus> deleteAppointment(@PathVariable Long employeeId, @PathVariable Long clientId,
             @RequestParam LocalDateTime date) {
 
@@ -70,12 +72,5 @@ public class AppointmentController {
     @GetMapping("/employees/{employeeId}")
     public ResponseEntity<List<Appointment>> getAppointmentsByEmployee(@PathVariable Long employeeId) {
         return new ResponseEntity<>(appointmentService.getAppointmentsByEmployee(employeeId), HttpStatus.OK);
-    }
-
-    @GetMapping("/employees/{employeeId}/clients/{clientId}")
-    public ResponseEntity<List<Appointment>> getAppointmentsByClientAndEmployee(@PathVariable Long employeeId,
-            @PathVariable Long clientId) {
-        return new ResponseEntity<>(appointmentService.getAppointmentsByClientAndEmployee(clientId, employeeId),
-                HttpStatus.OK);
     }
 }

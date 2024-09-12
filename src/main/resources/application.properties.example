@@ -1,5 +1,12 @@
 spring.application.name=app_name
-spring.h2.console.enabled=true
-spring.h2.console.path=/h2
-spring.datasource.url=jdbc:h2:mem:database_name
-server.servlet.context-path=/CUSTOM_PATH
+#spring.h2.console.enabled=true
+#spring.h2.console.path=/h2
+#spring.datasource.url=jdbc:h2:mem:database_name
+#server.servlet.context-path=/CUSTOM_PATH
+
+spring.datasource.url=jdbc:mysql://localhost:3306/database_name
+spring.datasource.username=
+spring.datasource.password=
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=update

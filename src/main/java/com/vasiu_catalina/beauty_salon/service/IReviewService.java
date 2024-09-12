@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.vasiu_catalina.beauty_salon.entity.Review;
 
-public interface ReviewService {
+public interface IReviewService {
         
     Set<Review> getAllReviews();
 

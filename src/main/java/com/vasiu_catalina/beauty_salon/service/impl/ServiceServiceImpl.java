@@ -12,13 +12,13 @@ import com.vasiu_catalina.beauty_salon.exception.service.ServiceAlreadyExistsExc
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.ProductRepository;
 import com.vasiu_catalina.beauty_salon.repository.ServiceRepository;
-import com.vasiu_catalina.beauty_salon.service.ServiceService;
+import com.vasiu_catalina.beauty_salon.service.IServiceService;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @org.springframework.stereotype.Service
-public class ServiceServiceImpl implements ServiceService {
+public class ServiceServiceImpl implements IServiceService {
 
     private ServiceRepository serviceRepository;
     private ProductRepository productRepository;

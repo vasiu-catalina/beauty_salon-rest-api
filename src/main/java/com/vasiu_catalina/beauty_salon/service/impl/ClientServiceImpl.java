@@ -9,13 +9,13 @@ import com.vasiu_catalina.beauty_salon.entity.Client;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.ClientRepository;
-import com.vasiu_catalina.beauty_salon.service.ClientService;
+import com.vasiu_catalina.beauty_salon.service.IClientService;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Service
-public class ClientServiceImpl implements ClientService {
+public class ClientServiceImpl implements IClientService {
 
     private ClientRepository clientRepository;
 

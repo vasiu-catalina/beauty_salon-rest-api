@@ -6,7 +6,7 @@ import java.util.Set;
 import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Service;
 
-public interface EmployeeService {
+public interface IEmployeeService {
 
     List<Employee> getAllEmployees();
 

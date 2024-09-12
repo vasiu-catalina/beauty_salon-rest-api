@@ -7,7 +7,7 @@ import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Product;
 import com.vasiu_catalina.beauty_salon.entity.Service;
 
-public interface ServiceService {
+public interface IServiceService {
     
     List<Service> getAllServices();
 

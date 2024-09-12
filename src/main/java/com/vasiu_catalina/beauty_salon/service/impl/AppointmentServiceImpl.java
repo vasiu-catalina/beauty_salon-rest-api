@@ -87,11 +87,10 @@ public class AppointmentServiceImpl implements IAppointmentService {
     }
 
     @Override
+    @Transactional
     public Appointment updateAppointment(Long clientId, Long employeeId, LocalDateTime date, Appointment appointment) {
 
-        Optional<Appointment> optionalAppointment = appointmentRepository.findByClientIdAndEmployeeIdAndDate(clientId,
-                employeeId, date);
-        Appointment existingAppointment = unwrappedAppointment(optionalAppointment, clientId, employeeId, date);
+        Appointment existingAppointment = this.getAppointment(clientId, employeeId, date);
 
         if (!existingAppointment.getDate().equals(appointment.getDate())) {
             if (appointmentRepository.existsByClientIdAndDate(clientId, date))
@@ -103,7 +102,9 @@ public class AppointmentServiceImpl implements IAppointmentService {
             existingAppointment.setDate(appointment.getDate());
         }
             
-        Set<AppointmentService> appointmentServices = 
+        Set<AppointmentService> existingServices = existingAppointment.getServices();
+
+        Set<AppointmentService> updatedServices = 
         appointment.getServices()
         .stream()
         .map(service -> {
@@ -119,27 +120,34 @@ public class AppointmentServiceImpl implements IAppointmentService {
             
             return appointmentService;
         }).collect(Collectors.toSet());
+
+
+        existingServices.removeIf(service -> !updatedServices.contains(service));
+        existingServices.addAll(updatedServices);
         
-        BigDecimal totalPrice = appointmentServices.stream().map(service -> service.getServicePrice()).reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+        BigDecimal totalPrice = existingServices.stream().map(service -> service.getServicePrice()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
         existingAppointment.setTotalPrice(totalPrice);
-        existingAppointment.setServices(appointmentServices);
+        existingAppointment.setServices(existingServices);
 
         return appointmentRepository.save(existingAppointment);
     }
 
     @Override
     public void deleteAppointment(Long clientId, Long employeeId, LocalDateTime date) {
+        this.getAppointment(clientId, employeeId, date);
         appointmentRepository.deleteByClientIdAndEmployeeIdAndDate(clientId, employeeId, date);
     }
 
     @Override
     public List<Appointment> getAppointmentsByClient(Long clientId) {
+        this.getClient(clientId);
         return (List<Appointment>) appointmentRepository.findByClientId(clientId);
     }
 
     @Override
     public List<Appointment> getAppointmentsByEmployee(Long employeeId) {
+        this.getEmployee(employeeId);
         return (List<Appointment>) appointmentRepository.findByEmployeeId(employeeId);
     }
 
@@ -147,6 +155,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
     public List<Appointment> getAppointmentsByClientAndEmployee(Long clientId, Long employeeId) {
         return (List<Appointment>) appointmentRepository.findByClientIdAndEmployeeId(clientId, employeeId);
     }
+
 
     private Client getClient(Long clientId) {
         Optional<Client> client = clientRepository.findById(clientId);
@@ -157,6 +166,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
         Optional<Employee> employee = employeeRepository.findById(employeeId);
         return EmployeeServiceImpl.unwrappedEmployee(employee, employeeId);
     }
+
 
     static Appointment unwrappedAppointment(Optional<Appointment> appointment, Long clientId, Long employeeId,
             LocalDateTime date) {

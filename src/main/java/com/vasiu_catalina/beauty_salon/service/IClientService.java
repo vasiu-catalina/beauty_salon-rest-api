@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.vasiu_catalina.beauty_salon.entity.Client;
 
-public interface ClientService {
+public interface IClientService {
 
     List<Client> getAllClients();
 

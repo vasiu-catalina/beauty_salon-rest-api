@@ -10,13 +10,13 @@ import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeAlreadyExistsE
 import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.EmployeeRepository;
 import com.vasiu_catalina.beauty_salon.repository.ServiceRepository;
-import com.vasiu_catalina.beauty_salon.service.EmployeeService;
+import com.vasiu_catalina.beauty_salon.service.IEmployeeService;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @org.springframework.stereotype.Service
-public class EmployeeServiceImpl implements EmployeeService {
+public class EmployeeServiceImpl implements IEmployeeService {
 
     private EmployeeRepository employeeRepository;
     private ServiceRepository serviceRepository;

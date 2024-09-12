@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Product;
 import com.vasiu_catalina.beauty_salon.entity.Service;
-import com.vasiu_catalina.beauty_salon.service.ServiceService;
+import com.vasiu_catalina.beauty_salon.service.IServiceService;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/api/v1/services")
 public class ServiceController {
 
-    private ServiceService serviceService;
+    private IServiceService serviceService;
 
     @GetMapping
     public ResponseEntity<List<Service>> getAllServices() {

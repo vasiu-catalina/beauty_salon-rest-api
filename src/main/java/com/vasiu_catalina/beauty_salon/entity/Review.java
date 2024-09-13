@@ -13,6 +13,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -20,7 +24,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"client_id", "employee_id",})
+})
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -32,11 +38,13 @@ public class Review {
     private Long id;
 
     @NonNull
+    @Min(value = 1, message="Minimum raing is 1.")
+    @Max(value = 5, message="Maximum rating is 5.")
+    @NotNull(message = "Rating is required")
     @Column(nullable = false)
-    private String rating;
+    private Integer rating;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Lob
     private String description;
 

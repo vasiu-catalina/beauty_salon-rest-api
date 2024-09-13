@@ -1,14 +1,15 @@
 package com.vasiu_catalina.beauty_salon.service;
 
+import java.util.List;
 import java.util.Set;
 
 import com.vasiu_catalina.beauty_salon.entity.Review;
 
 public interface IReviewService {
         
-    Set<Review> getAllReviews();
+    List<Review> getAllReviews();
 
-    Review createReview(Review review);
+    Review createReview(Long clientId, Long employeeId, Review review);
 
     Review getReview(Long clientId, Long employeeId);
 

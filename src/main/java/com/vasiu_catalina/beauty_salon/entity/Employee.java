@@ -1,6 +1,7 @@
 package com.vasiu_catalina.beauty_salon.entity;
 
 import java.util.Set;
+import java.util.HashSet;
 
 import org.springframework.format.annotation.NumberFormat;
 
@@ -112,7 +113,7 @@ public class Employee {
     @JsonIgnore
     @ManyToMany
     @JoinTable(name = "employee_services", joinColumns = @JoinColumn(name = "employee_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "service_id", referencedColumnName = "id"))
-    private Set<Service> services;
+    private Set<Service> services = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

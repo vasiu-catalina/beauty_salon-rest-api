@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import com.vasiu_catalina.beauty_salon.entity.Appointment;
@@ -58,26 +59,25 @@ public class AppointmentServiceImpl implements IAppointmentService {
         if (appointmentRepository.existsByEmployeeIdAndDate(employeeId, date))
             throw new AppointmentAlreadyExistsException("employee", employeeId, date);
 
-            
-            Set<AppointmentService> appointmentServices = 
-            appointment.getServices()
-            .stream()
-            .map(service -> {
-                AppointmentService appointmentService = new AppointmentService();
-                Long serviceId = service.getService().getId();
-                
-                Optional<Service> optionalService = serviceRepository.findById(serviceId);
-                Service unwrappedService = ServiceServiceImpl.unwrappedService(optionalService, serviceId);
-                
-                appointmentService.setServicePrice(unwrappedService.getPrice());
-                appointmentService.setAppointment(appointment);
-                appointmentService.setService(unwrappedService);
-                
-                return appointmentService;
-            }).collect(Collectors.toSet());
-            
-            BigDecimal totalPrice = appointmentServices.stream().map(service -> service.getServicePrice()).reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+        Set<AppointmentService> appointmentServices = appointment.getServices()
+                .stream()
+                .map(service -> {
+                    AppointmentService appointmentService = new AppointmentService();
+                    Long serviceId = service.getService().getId();
+
+                    Optional<Service> optionalService = serviceRepository.findById(serviceId);
+                    Service unwrappedService = ServiceServiceImpl.unwrappedService(optionalService, serviceId);
+
+                    appointmentService.setServicePrice(unwrappedService.getPrice());
+                    appointmentService.setAppointment(appointment);
+                    appointmentService.setService(unwrappedService);
+
+                    return appointmentService;
+                }).collect(Collectors.toSet());
+
+        BigDecimal totalPrice = appointmentServices.stream().map(service -> service.getServicePrice())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         appointment.setClient(client);
         appointment.setEmployee(employee);
         appointment.setTotalPrice(totalPrice);
@@ -87,45 +87,44 @@ public class AppointmentServiceImpl implements IAppointmentService {
     }
 
     @Override
-    @Transactional
     public Appointment updateAppointment(Long clientId, Long employeeId, LocalDateTime date, Appointment appointment) {
 
         Appointment existingAppointment = this.getAppointment(clientId, employeeId, date);
 
         if (!existingAppointment.getDate().equals(appointment.getDate())) {
-            if (appointmentRepository.existsByClientIdAndDate(clientId, date))
-                throw new AppointmentAlreadyExistsException("client", clientId, date);
+            if (appointmentRepository.existsByClientIdAndDate(clientId, appointment.getDate()))
+                throw new AppointmentAlreadyExistsException("client", clientId, appointment.getDate());
 
-            if (appointmentRepository.existsByEmployeeIdAndDate(employeeId, date))
-                throw new AppointmentAlreadyExistsException("employee", employeeId, date);
+            if (appointmentRepository.existsByEmployeeIdAndDate(employeeId, appointment.getDate()))
+                throw new AppointmentAlreadyExistsException("employee", employeeId, appointment.getDate());
 
             existingAppointment.setDate(appointment.getDate());
         }
-            
-        Set<AppointmentService> existingServices = existingAppointment.getServices();
 
-        Set<AppointmentService> updatedServices = 
-        appointment.getServices()
-        .stream()
-        .map(service -> {
-            AppointmentService appointmentService = new AppointmentService();
+        Set<AppointmentService> existingServices = existingAppointment.getServices();
+        Set<AppointmentService> updatedServices = new HashSet<>();
+
+        for (AppointmentService service : appointment.getServices()) {
             Long serviceId = service.getService().getId();
-            
+
             Optional<Service> optionalService = serviceRepository.findById(serviceId);
             Service unwrappedService = ServiceServiceImpl.unwrappedService(optionalService, serviceId);
-            
+
+            AppointmentService appointmentService = new AppointmentService();
             appointmentService.setServicePrice(unwrappedService.getPrice());
-            appointmentService.setAppointment(appointment);
+            appointmentService.setAppointment(existingAppointment);
             appointmentService.setService(unwrappedService);
-            
-            return appointmentService;
-        }).collect(Collectors.toSet());
 
+            updatedServices.add(appointmentService);
+        }
 
-        existingServices.removeIf(service -> !updatedServices.contains(service));
+        existingServices.clear();
         existingServices.addAll(updatedServices);
-        
-        BigDecimal totalPrice = existingServices.stream().map(service -> service.getServicePrice()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalPrice = existingServices
+                .stream()
+                .map(service -> service.getServicePrice())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         existingAppointment.setTotalPrice(totalPrice);
         existingAppointment.setServices(existingServices);
@@ -156,7 +155,6 @@ public class AppointmentServiceImpl implements IAppointmentService {
         return (List<Appointment>) appointmentRepository.findByClientIdAndEmployeeId(clientId, employeeId);
     }
 
-
     private Client getClient(Long clientId) {
         Optional<Client> client = clientRepository.findById(clientId);
         return ClientServiceImpl.unwrappedClient(client, clientId);
@@ -166,7 +164,6 @@ public class AppointmentServiceImpl implements IAppointmentService {
         Optional<Employee> employee = employeeRepository.findById(employeeId);
         return EmployeeServiceImpl.unwrappedEmployee(employee, employeeId);
     }
-
 
     static Appointment unwrappedAppointment(Optional<Appointment> appointment, Long clientId, Long employeeId,
             LocalDateTime date) {

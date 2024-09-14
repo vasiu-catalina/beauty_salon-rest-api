@@ -66,7 +66,7 @@ public class ServiceController {
     }
 
     @PutMapping("/{serviceId}/products/{productId}")
-    public ResponseEntity<Service> addProductToService(@PathVariable Long serviceId, @PathVariable Long productId) {
+    public ResponseEntity<Product> addProductToService(@PathVariable Long serviceId, @PathVariable Long productId) {
         return new ResponseEntity<>(serviceService.addProductToService(productId, serviceId), HttpStatus.OK);
     }
 

@@ -7,6 +7,8 @@ import java.util.Optional;
 import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Product;
 import com.vasiu_catalina.beauty_salon.entity.Service;
+import com.vasiu_catalina.beauty_salon.exception.service.ProductAlreadyAddedToServiceException;
+import com.vasiu_catalina.beauty_salon.exception.service.ProductNotFoundForServiceException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.ProductRepository;
@@ -54,7 +56,7 @@ public class ServiceServiceImpl implements IServiceService {
         existingService.setDuration(service.getDuration());
         existingService.setPrice(service.getPrice());
 
-        return serviceRepository.save(service);
+        return serviceRepository.save(existingService);
     }
 
     @Override
@@ -76,18 +78,25 @@ public class ServiceServiceImpl implements IServiceService {
     }
 
     @Override
-    public Service addProductToService(Long productId, Long serviceId) {
+    public Product addProductToService(Long productId, Long serviceId) {
         Product product = this.getProduct(productId);
         Service service = this.getService(serviceId);
 
+        if (service.getProducts().contains(product))
+            throw new ProductAlreadyAddedToServiceException(product.getName(), service.getName());
+
         service.getProducts().add(product);
-        return serviceRepository.save(service);
+        serviceRepository.save(service);
+        return product;
     }
 
     @Override
     public void deleteProductFromService(Long productId, Long serviceId) {
         Product product = this.getProduct(productId);
         Service service = this.getService(serviceId);
+
+        if (!service.getProducts().contains(product))
+            throw new ProductNotFoundForServiceException(product.getName(), service.getName());
 
         service.getProducts().remove(product);
         serviceRepository.save(service);

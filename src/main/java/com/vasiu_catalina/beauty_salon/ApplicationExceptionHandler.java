@@ -22,13 +22,13 @@ import org.springframework.lang.NonNull;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+
 import com.vasiu_catalina.beauty_salon.exception.ErrorResponse;
 import com.vasiu_catalina.beauty_salon.exception.appointment.*;
 import com.vasiu_catalina.beauty_salon.exception.client.*;
 import com.vasiu_catalina.beauty_salon.exception.employee.*;
 import com.vasiu_catalina.beauty_salon.exception.product.*;
-import com.vasiu_catalina.beauty_salon.exception.review.ReviewAlreadyExistsException;
-import com.vasiu_catalina.beauty_salon.exception.review.ReviewNotFoundException;
+import com.vasiu_catalina.beauty_salon.exception.review.*;
 import com.vasiu_catalina.beauty_salon.exception.service.*;
 
 @ControllerAdvice
@@ -67,9 +67,11 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 
         if (cause instanceof MismatchedInputException mie) {
             errors = this.mismatchedInpuException(mie);
-        } else if (cause instanceof JsonMappingException jpe) {
+        } else 
+        if (cause instanceof JsonMappingException jpe) {
             errors = this.jsonMappingException(jpe);
-        } else {
+        } else 
+        {
             errors.put(type, message);
         }
         return new ResponseEntity<>(new ErrorResponse(errors), HttpStatus.BAD_REQUEST);
@@ -81,7 +83,8 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
             EmployeeNotFoundException.class,
             ProductNotFoundException.class,
             ReviewNotFoundException.class,
-            ServiceNotFoundException.class
+            ServiceNotFoundException.class,
+            ProductNotFoundForServiceException.class
     })
     public ResponseEntity<Object> handleResourceNotFoundException(RuntimeException ex) {
 
@@ -98,7 +101,8 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
             EmployeeAlreadyExistsException.class,
             ProductAlreadyExistsException.class,
             ReviewAlreadyExistsException.class,
-            ServiceAlreadyExistsException.class
+            ServiceAlreadyExistsException.class,
+            ProductAlreadyAddedToServiceException.class
     })
     public ResponseEntity<Object> handleEntityAlreadyExistsExeception(DataIntegrityViolationException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -113,7 +117,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
                 .stream()
                 .map(ref -> ref.getFieldName())
                 .findFirst()
-                .orElse("unknown field");
+                .orElse("error");
 
         String message = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1) + " is required.";
 
@@ -129,7 +133,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
                 .stream()
                 .map(ref -> ref.getFieldName())
                 .findFirst()
-                .orElse("unknown field");
+                .orElse("error");
 
         String message = "Invalid request body provided.";
         HashMap<String, String> error = new HashMap<>();
@@ -138,10 +142,10 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
             message = "Invalid number provided.";
 
         } else if (ex.getTargetType() == LocalDate.class) {
-            message = "Invalid date provided. Expected format is yyyy-mm-dd. ";
+            message = "Invalid date provided. Expected format is yyyy-mm-dd.";
 
         } else if (ex.getTargetType() == LocalDateTime.class) {
-            message = "Invalid date provided. Expected format is yyyy-mm-dd'T'hh:mm:ss";
+            message = "Invalid date provided. Expected format is yyyy-mm-dd'T'hh:mm:ss.";
         }
 
         error.put(fieldName, message);

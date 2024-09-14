@@ -23,7 +23,7 @@ public interface IServiceService {
 
     Set<Product> getProductsByService(Long serviceId);
 
-    Service addProductToService(Long productId, Long serviceId);
+    Product addProductToService(Long productId, Long serviceId);
 
     void deleteProductFromService(Long productId, Long serviceId);
 }

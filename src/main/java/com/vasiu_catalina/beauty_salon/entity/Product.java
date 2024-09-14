@@ -2,6 +2,7 @@ package com.vasiu_catalina.beauty_salon.entity;
 
 import java.util.Set;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.NumberFormat;
 
 import java.math.BigDecimal;
@@ -63,6 +64,7 @@ public class Product {
     
     @NonNull
     @NotNull(message = "Expiry date is required")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @Future(message = "Expiry date cannot be in the past.")
     @Column(name = "expiry_date", nullable = false)
     private LocalDate expiryDate;

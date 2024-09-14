@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vasiu_catalina.beauty_salon.entity.Review;
 import com.vasiu_catalina.beauty_salon.service.IReviewService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
+@Tag(name="Reviews")
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/reviews")

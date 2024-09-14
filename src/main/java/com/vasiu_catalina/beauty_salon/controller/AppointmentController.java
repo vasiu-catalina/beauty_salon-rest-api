@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vasiu_catalina.beauty_salon.entity.Appointment;
 import com.vasiu_catalina.beauty_salon.service.IAppointmentService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 
+@Tag(name = "Appointments")
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/appointments")

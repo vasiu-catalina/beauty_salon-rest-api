@@ -10,6 +10,7 @@ import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Service;
 import com.vasiu_catalina.beauty_salon.service.IEmployeeService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+@Tag(name="Employees")
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/employees")

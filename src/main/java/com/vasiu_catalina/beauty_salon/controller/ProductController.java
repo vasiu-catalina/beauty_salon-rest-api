@@ -18,9 +18,11 @@ import com.vasiu_catalina.beauty_salon.entity.Product;
 import com.vasiu_catalina.beauty_salon.entity.Service;
 import com.vasiu_catalina.beauty_salon.service.IProductService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
+@Tag(name="Products")
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/products")

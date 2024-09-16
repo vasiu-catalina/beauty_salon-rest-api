@@ -152,6 +152,8 @@ public class AppointmentServiceImpl implements IAppointmentService {
 
     @Override
     public List<Appointment> getAppointmentsByClientAndEmployee(Long clientId, Long employeeId) {
+        this.getClient(clientId);
+        this.getEmployee(employeeId);
         return (List<Appointment>) appointmentRepository.findByClientIdAndEmployeeId(clientId, employeeId);
     }
 

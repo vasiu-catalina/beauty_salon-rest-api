@@ -1,6 +1,7 @@
 package com.vasiu_catalina.beauty_salon.entity;
 
 import java.util.Set;
+import java.util.HashSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -76,11 +77,11 @@ public class Client {
 
     @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
-    private Set<Appointment> appointments;
+    private Set<Appointment> appointments = new HashSet<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
-    private Set<Review> reviews;
+    private Set<Review> reviews = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

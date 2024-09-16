@@ -45,109 +45,82 @@ public class ProductServiceTest {
     @Test
     public void testGetAllProducts() {
 
-        when(productRepository.findAll()).thenReturn(List.of(
-                new Product("Lampa manichiura", new BigDecimal(200), LocalDate.of(2030, 12, 31)),
-                new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15))));
+        when(productRepository.findAll()).thenReturn(List.of(createOtherProduct(), createProduct()));
 
         List<Product> result = productService.getAllProducts();
 
         assertEquals(2, result.size());
         assertEquals("Lampa manichiura", result.get(0).getName());
         assertEquals(new BigDecimal(300), result.get(1).getPrice());
+        verify(productRepository, times(1)).findAll();
     }
 
     @Test
     public void testCreateProduct() {
-        // Product clinet =
 
-        Product product = new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15));
-
-        when(productRepository.save(any(Product.class)))
-                .thenReturn(product)
-                .thenReturn(product);
+        Product product = createProduct();
+        when(productRepository.save(any(Product.class))).thenReturn(product);
 
         Product result = productService.createProduct(product);
 
+        assertFullResult(result);
         verify(productRepository, times(1)).save(product);
-        assertNotNull(result);
-
-        assertEquals("Unghii false", result.getName());
-        assertEquals(LocalDate.of(2026, 3, 15), result.getExpiryDate());
-        assertEquals(Integer.valueOf(0), result.getQuantity());
-        assertEquals(new BigDecimal(300), result.getPrice());
-
         verify(productRepository, times(1)).save(any(Product.class));
 
     }
 
     @Test
     public void testNameAlreadyTaken() {
-        Product product = new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15));
-
+        Product product = createProduct();
         when(productRepository.findByName(product.getName())).thenReturn(Optional.of(product));
 
         ProductAlreadyExistsException exception = assertThrows(ProductAlreadyExistsException.class, () -> {
             productService.createProduct(product);
         });
 
-        assertEquals("Product named \"" + product.getName() + "\" already exists.", exception.getMessage());
-
+        assertProductAlreadyExistsException(exception, product.getName());
         verify(productRepository, times(1)).findByName(product.getName());
         verify(productRepository, never()).save(product);
     }
-
 
     @Test
     public void testGetProduct() {
 
         Long productId = 1L;
-        Product product = new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15));
-
+        Product product = createProduct();
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         Product result = productService.getProduct(productId);
 
-        assertNotNull(result);
-        assertEquals("Unghii false", result.getName());
-        assertEquals(LocalDate.of(2026, 3, 15), result.getExpiryDate());
-        assertEquals(Integer.valueOf(0), result.getQuantity());
-        assertEquals(new BigDecimal(300), result.getPrice());
-
+        assertFullResult(result);
         verify(productRepository, times(1)).findById(productId);
     }
 
     @Test
     public void testProductNotFound() {
         Long productId = 1L;
-
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
         ProductNotFoundException exception = assertThrows(ProductNotFoundException.class, () -> {
             productService.getProduct(productId);
         });
 
-        assertEquals("Product with ID of " + productId + " was not found.", exception.getMessage());
-
+        assertProductNotFoundException(exception, productId);
         verify(productRepository, times(1)).findById(productId);
     }
 
     @Test
     public void testUpdateProduct() {
         Long productId = 1L;
-        Product existingProduct = new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15));
-        Product updatedProduct = new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15));
+        Product existingProduct = createOtherProduct();
+        Product updatedProduct = createProduct();
 
         when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
         when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
 
         Product result = productService.updateProduct(productId, updatedProduct);
 
-        assertNotNull(result);
-        assertEquals("Unghii false", result.getName());
-        assertEquals(LocalDate.of(2026, 3, 15), result.getExpiryDate());
-        assertEquals(Integer.valueOf(0), result.getQuantity());
-        assertEquals(new BigDecimal(300), result.getPrice());
-
+        assertFullResult(result);
         verify(productRepository, times(1)).findById(productId);
         verify(productRepository, times(1)).save(existingProduct);
     }
@@ -155,32 +128,26 @@ public class ProductServiceTest {
     @Test
     public void testUpdateProductNotFound() {
         Long productId = 1L;
-        Product updatedProduct = new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15));
-
+        Product updatedProduct = createProduct();
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
         ProductNotFoundException exception = assertThrows(ProductNotFoundException.class, () -> {
             productService.updateProduct(productId, updatedProduct);
         });
 
-        assertEquals("Product with ID of " + productId + " was not found.", exception.getMessage());
-
+        assertProductNotFoundException(exception, productId);
         verify(productRepository, times(1)).findById(productId);
         verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
     public void testDeleteProduct() {
-        // arrange
         Long productId = 1L;
-        Product existingProduct = new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15));
-
+        Product existingProduct = createProduct();
         when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
 
-        // act
         productService.deleteProduct(productId);
 
-        // assert
         verify(productRepository, times(1)).findById(productId);
         verify(productRepository, times(1)).deleteById(productId);
     }
@@ -188,15 +155,13 @@ public class ProductServiceTest {
     @Test
     public void testdeleteProductNotFound() {
         Long productId = 1L;
-
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
         ProductNotFoundException exception = assertThrows(ProductNotFoundException.class, () -> {
             productService.deleteProduct(productId);
         });
 
-        assertEquals("Product with ID of " + productId + " was not found.", exception.getMessage());
-
+        assertProductNotFoundException(exception, productId);
         verify(productRepository, times(1)).findById(productId);
         verify(productRepository, never()).deleteById(productId);
     }
@@ -205,20 +170,45 @@ public class ProductServiceTest {
     public void testGetServicesByProduct() {
 
         Long productId = 1L;
-        Product product = new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15));
-
-        Set<Service> expectedServices = new HashSet<>(List.of(
-                new Service("Manichiura", "Serviciu bun", new BigDecimal(100), 60),
-                new Service("Renovare unghii", "Serviciu excelent", new BigDecimal(140), 80)));
-
+        Product product = createProduct();
+        Set<Service> expectedServices = new HashSet<>(
+                List.of(ServiceServiceTest.createService(), ServiceServiceTest.createOtherService()));
         product.setServices(expectedServices);
-
+        
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         Set<Service> result = productService.getServicesByProduct(productId);
 
         assertEquals(expectedServices, result);
         verify(productRepository, times(1)).findById(productId);
+
+    }
+
+    public static void assertProductNotFoundException(ProductNotFoundException exception, Long clientId) {
+        ProductNotFoundException expected = new ProductNotFoundException(clientId);
+        assertEquals(expected.getMessage(), exception.getMessage());
+    }
+
+    public static void assertProductAlreadyExistsException(ProductAlreadyExistsException exception,
+            String uniqueFieldName) {
+        ProductAlreadyExistsException expected = new ProductAlreadyExistsException(uniqueFieldName);
+        assertEquals(expected.getMessage(), exception.getMessage());
+    }
+
+    public static Product createProduct() {
+        return new Product("Unghii false", new BigDecimal(300), LocalDate.of(2026, 3, 15));
+    }
+
+    public static Product createOtherProduct() {
+        return new Product("Lampa manichiura", new BigDecimal(200), LocalDate.of(2030, 12, 31));
+    }
+
+    private void assertFullResult(Product result) {
+        assertNotNull(result);
+        assertEquals("Unghii false", result.getName());
+        assertEquals(LocalDate.of(2026, 3, 15), result.getExpiryDate());
+        assertEquals(Integer.valueOf(0), result.getQuantity());
+        assertEquals(new BigDecimal(300), result.getPrice());
 
     }
 

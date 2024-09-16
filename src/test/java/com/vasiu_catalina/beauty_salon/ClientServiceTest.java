@@ -37,11 +37,7 @@ public class ClientServiceTest {
     @Test
     public void testGetAllClients() {
 
-        when(clientRepository.findAll()).thenReturn(List.of(
-                new Client("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                        LocalDate.of(2000, 1, 1)),
-                new Client("Prenume", "Nume", "nume@gmail.com", "+4072xxxxxxx", "Str. Random Nr. 1",
-                        LocalDate.of(2001, 2, 2))));
+        when(clientRepository.findAll()).thenReturn(List.of(createClient(), createOtherClient()));
 
         List<Client> result = clientService.getAllClients();
 
@@ -52,33 +48,20 @@ public class ClientServiceTest {
 
     @Test
     public void testCreateClient() {
-        // Client clinet =
 
-        Client client = new Client("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1));
-
-        when(clientRepository.save(any(Client.class)))
-                .thenReturn(client)
-                .thenReturn(client);
+        Client client = createClient();
+        when(clientRepository.save(any(Client.class))).thenReturn(client);
 
         Client result = clientService.createClient(client);
 
+        assertFullResult(result);
         verify(clientRepository, times(1)).save(client);
-        assertNotNull(result);
-
-        assertEquals("Catalina", result.getFirstName());
-        assertEquals("Vasiu", result.getLastName());
-        assertEquals("cata@gmail.com", result.getEmail());
-        assertEquals("+4071xxxxxxx", result.getPhoneNumber());
-        assertEquals("Str. Anonim Nr. 0", result.getAddress());
-        assertEquals(LocalDate.of(2000, 1, 1), result.getBirthDate());
 
     }
 
     @Test
     public void testEmailAlreadyTaken() {
-        Client client = new Client("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1));
+        Client client = createClient();
 
         when(clientRepository.findByEmail(client.getEmail())).thenReturn(Optional.of(client));
 
@@ -86,24 +69,20 @@ public class ClientServiceTest {
             clientService.createClient(client);
         });
 
-        assertEquals("Email already taken.", exception.getMessage());
-
+        assertClientAlreadyExistsException(exception, "Email");
         verify(clientRepository, times(1)).findByEmail(client.getEmail());
     }
 
     @Test
     public void testPhoneNumberAlreadyTaken() {
-        Client client = new Client("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1));
-
+        Client client = createClient();
         when(clientRepository.findByPhoneNumber(client.getPhoneNumber())).thenReturn(Optional.of(client));
 
         ClientAlreadyExistsException exception = assertThrows(ClientAlreadyExistsException.class, () -> {
             clientService.createClient(client);
         });
 
-        assertEquals("Phone number already taken.", exception.getMessage());
-
+        assertClientAlreadyExistsException(exception, "Phone number");
         verify(clientRepository, times(1)).findByPhoneNumber(client.getPhoneNumber());
     }
 
@@ -111,21 +90,12 @@ public class ClientServiceTest {
     public void testGetClient() {
 
         Long clientId = 1L;
-        Client client = new Client("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1));
-
+        Client client = createClient();
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
 
         Client result = clientService.getClient(clientId);
 
-        assertNotNull(result);
-        assertEquals("Catalina", result.getFirstName());
-        assertEquals("Vasiu", result.getLastName());
-        assertEquals("cata@gmail.com", result.getEmail());
-        assertEquals("+4071xxxxxxx", result.getPhoneNumber());
-        assertEquals("Str. Anonim Nr. 0", result.getAddress());
-        assertEquals(LocalDate.of(2000, 1, 1), result.getBirthDate());
-
+        assertFullResult(result);
         verify(clientRepository, times(1)).findById(clientId);
         verify(clientRepository, never()).save(any(Client.class));
     }
@@ -140,8 +110,7 @@ public class ClientServiceTest {
             clientService.getClient(clientId);
         });
 
-        assertEquals("Client with ID " + clientId +  " was not found.", exception.getMessage());
-
+        assertClientNotFoundException(exception, clientId);
         verify(clientRepository, times(1)).findById(clientId);
         verify(clientRepository, never()).save(any(Client.class));
     }
@@ -149,24 +118,15 @@ public class ClientServiceTest {
     @Test
     public void testUpdateClient() {
         Long clientId = 1L;
-        Client existingClient = new Client("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1));
-        Client updatedClient = new Client("Cata", "Vasiu", "cata@gmail.com", "+4072xxxxxxx", "Str. Noua Adresa",
-                LocalDate.of(2000, 1, 1));
+        Client existingClient = createOtherClient();
+        Client updatedClient = createClient();
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(existingClient));
         when(clientRepository.save(any(Client.class))).thenReturn(updatedClient);
 
         Client result = clientService.updateClient(clientId, updatedClient);
 
-        assertNotNull(result);
-        assertEquals("Cata", result.getFirstName());
-        assertEquals("Vasiu", result.getLastName());
-        assertEquals("cata@gmail.com", result.getEmail());
-        assertEquals("+4072xxxxxxx", result.getPhoneNumber());
-        assertEquals("Str. Noua Adresa", result.getAddress());
-        assertEquals(LocalDate.of(2000, 1, 1), result.getBirthDate());
-
+        assertFullResult(result);
         verify(clientRepository, times(1)).findById(clientId);
         verify(clientRepository, times(1)).save(existingClient);
     }
@@ -174,8 +134,7 @@ public class ClientServiceTest {
     @Test
     public void testUpdateClientNotFound() {
         Long clientId = 1L;
-        Client updatedClient = new Client("Cata", "Vasiu", "cata@gmail.com", "+4072xxxxxxx", "Str. Noua Adresa",
-                LocalDate.of(2000, 1, 1));
+        Client updatedClient = createClient();
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
 
@@ -183,8 +142,7 @@ public class ClientServiceTest {
             clientService.updateClient(clientId, updatedClient);
         });
 
-        assertEquals("Client with ID " + clientId +  " was not found.", exception.getMessage());
-
+        assertClientNotFoundException(exception, clientId);
         verify(clientRepository, times(1)).findById(clientId);
         verify(clientRepository, never()).save(any(Client.class));
     }
@@ -193,8 +151,7 @@ public class ClientServiceTest {
     public void testDeleteClient() {
         // arrange
         Long clientId = 1L;
-        Client existingClient = new Client("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1));
+        Client existingClient = createClient();
 
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(existingClient));
 
@@ -216,10 +173,40 @@ public class ClientServiceTest {
             clientService.deleteClient(clientId);
         });
 
-        assertEquals("Client with ID " + clientId +  " was not found.", exception.getMessage());
-
+        assertClientNotFoundException(exception, clientId);
         verify(clientRepository, times(1)).findById(clientId);
         verify(clientRepository, never()).deleteById(clientId);
+    }
+
+    private static void assertFullResult(Client result) {
+        assertNotNull(result);
+        assertEquals("Catalina", result.getFirstName());
+        assertEquals("Vasiu", result.getLastName());
+        assertEquals("cata@gmail.com", result.getEmail());
+        assertEquals("+4071xxxxxxx", result.getPhoneNumber());
+        assertEquals("Str. Anonim Nr. 0", result.getAddress());
+        assertEquals(LocalDate.of(2000, 1, 1), result.getBirthDate());
+    }
+
+    public static void assertClientAlreadyExistsException(ClientAlreadyExistsException exception,
+            String uniqueFieldName) {
+        ClientAlreadyExistsException expected = new ClientAlreadyExistsException(uniqueFieldName);
+        assertEquals(expected.getMessage(), exception.getMessage());
+    }
+
+    public static Client createClient() {
+        return new Client("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
+                LocalDate.of(2000, 1, 1));
+    }
+
+    public static Client createOtherClient() {
+        return new Client("Prenume", "Nume", "nume@gmail.com", "+4072xxxxxxx", "Str. Random Nr. 1",
+                LocalDate.of(2001, 2, 2));
+    }
+
+    public static void assertClientNotFoundException(ClientNotFoundException exception, Long clientId) {
+        ClientNotFoundException expected = new ClientNotFoundException(clientId);
+        assertEquals(expected.getMessage(), exception.getMessage());
     }
 
 }

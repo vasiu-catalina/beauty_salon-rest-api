@@ -48,11 +48,7 @@ public class EmployeeServiceTest {
     @Test
     public void testGetAllEmployees() {
 
-        when(employeeRepository.findAll()).thenReturn(List.of(
-                new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                        LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000)),
-                new Employee("Prenume", "Nume", "nume@gmail.com", "+4072xxxxxxx", "Str. Random Nr. 1",
-                        LocalDate.of(2001, 2, 2), "Specializare", new BigDecimal(2000))));
+        when(employeeRepository.findAll()).thenReturn(List.of(createEmployee(), createOtherEmployee()));
 
         List<Employee> result = employeeService.getAllEmployees();
 
@@ -63,64 +59,40 @@ public class EmployeeServiceTest {
 
     @Test
     public void testCreateEmployee() {
-        // Employee clinet =
-
-        Employee employee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-
-        when(employeeRepository.save(any(Employee.class)))
-                .thenReturn(employee)
-                .thenReturn(employee);
+        Employee employee = createEmployee();
+        when(employeeRepository.save(any(Employee.class))).thenReturn(employee);
 
         Employee result = employeeService.createEmployee(employee);
 
+        assertFullResult(result);
         verify(employeeRepository, times(1)).save(employee);
-        assertNotNull(result);
-
-        assertEquals("Catalina", result.getFirstName());
-        assertEquals("Vasiu", result.getLastName());
-        assertEquals("cata@gmail.com", result.getEmail());
-        assertEquals("+4071xxxxxxx", result.getPhoneNumber());
-        assertEquals("Str. Anonim Nr. 0", result.getAddress());
-        assertEquals(LocalDate.of(2000, 1, 1), result.getBirthDate());
-        assertEquals("Manichiurista", result.getSpecialization());
-        assertEquals("employee", result.getRole());
-        assertEquals(new BigDecimal(5000), result.getSalary());
-
-        verify(employeeRepository, times(1)).save(any(Employee.class));
 
     }
 
     @Test
     public void testEmailAlreadyTaken() {
-        Employee employee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-
+        Employee employee = createEmployee();
         when(employeeRepository.findByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
 
         EmployeeAlreadyExistsException exception = assertThrows(EmployeeAlreadyExistsException.class, () -> {
             employeeService.createEmployee(employee);
         });
 
-        assertEquals("Email already taken.", exception.getMessage());
-
+        assertEmployeeAlreadyExistsException(exception, "Email");
         verify(employeeRepository, times(1)).findByEmail(employee.getEmail());
         verify(employeeRepository, never()).save(employee);
     }
 
     @Test
     public void testPhoneNumberAlreadyTaken() {
-        Employee employee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-
+        Employee employee = createEmployee();
         when(employeeRepository.findByPhoneNumber(employee.getPhoneNumber())).thenReturn(Optional.of(employee));
 
         EmployeeAlreadyExistsException exception = assertThrows(EmployeeAlreadyExistsException.class, () -> {
             employeeService.createEmployee(employee);
         });
 
-        assertEquals("Phone number already taken.", exception.getMessage());
-
+        assertEmployeeAlreadyExistsException(exception, "Phone number");
         verify(employeeRepository, times(1)).findByPhoneNumber(employee.getPhoneNumber());
         verify(employeeRepository, never()).save(employee);
     }
@@ -129,67 +101,40 @@ public class EmployeeServiceTest {
     public void testGetEmployee() {
 
         Long employeeId = 1L;
-        Employee employee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-
+        Employee employee = createEmployee();
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
 
         Employee result = employeeService.getEmployee(employeeId);
 
-        assertNotNull(result);
-        assertEquals("Catalina", result.getFirstName());
-        assertEquals("Vasiu", result.getLastName());
-        assertEquals("cata@gmail.com", result.getEmail());
-        assertEquals("+4071xxxxxxx", result.getPhoneNumber());
-        assertEquals("Str. Anonim Nr. 0", result.getAddress());
-        assertEquals(LocalDate.of(2000, 1, 1), result.getBirthDate());
-        assertEquals("Manichiurista", result.getSpecialization());
-        assertEquals("employee", result.getRole());
-        assertEquals(new BigDecimal(5000), result.getSalary());
-
+        assertFullResult(result);
         verify(employeeRepository, times(1)).findById(employeeId);
     }
 
     @Test
     public void testEmployeeNotFound() {
         Long employeeId = 1L;
-
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
 
         EmployeeNotFoundException exception = assertThrows(EmployeeNotFoundException.class, () -> {
             employeeService.getEmployee(employeeId);
         });
 
-        assertEquals("Employee with ID " + employeeId + " was not found.", exception.getMessage());
-
+        assertEmployeeNotFoundException(exception, employeeId);
         verify(employeeRepository, times(1)).findById(employeeId);
     }
 
     @Test
     public void testUpdateEmployee() {
         Long employeeId = 1L;
-        Employee existingEmployee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx",
-                "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-        Employee updatedEmployee = new Employee("Cata", "Vasiu", "cata@gmail.com", "+4072xxxxxxx", "Str. Noua Adresa",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(6000));
+        Employee existingEmployee = createOtherEmployee();
+        Employee updatedEmployee = createEmployee();
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
         when(employeeRepository.save(any(Employee.class))).thenReturn(updatedEmployee);
 
         Employee result = employeeService.updateEmployee(employeeId, updatedEmployee);
 
-        assertNotNull(result);
-        assertEquals("Cata", result.getFirstName());
-        assertEquals("Vasiu", result.getLastName());
-        assertEquals("cata@gmail.com", result.getEmail());
-        assertEquals("+4072xxxxxxx", result.getPhoneNumber());
-        assertEquals("Str. Noua Adresa", result.getAddress());
-        assertEquals(LocalDate.of(2000, 1, 1), result.getBirthDate());
-        assertEquals("Manichiurista", result.getSpecialization());
-        assertEquals("employee", result.getRole());
-        assertEquals(new BigDecimal(6000), result.getSalary());
-
+        assertFullResult(result);
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(employeeRepository, times(1)).save(existingEmployee);
     }
@@ -197,9 +142,7 @@ public class EmployeeServiceTest {
     @Test
     public void testUpdateEmployeeNotFound() {
         Long employeeId = 1L;
-        Employee updatedEmployee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx",
-                "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
+        Employee updatedEmployee = createEmployee();
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
 
@@ -207,26 +150,20 @@ public class EmployeeServiceTest {
             employeeService.updateEmployee(employeeId, updatedEmployee);
         });
 
-        assertEquals("Employee with ID " + employeeId + " was not found.", exception.getMessage());
-
+        assertEmployeeNotFoundException(exception, employeeId);
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(employeeRepository, never()).save(any(Employee.class));
     }
 
     @Test
     public void testDeleteEmployee() {
-        // arrange
         Long employeeId = 1L;
-        Employee existingEmployee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx",
-                "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
+        Employee existingEmployee = createEmployee();
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
 
-        // act
         employeeService.deleteEmployee(employeeId);
 
-        // assert
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(employeeRepository, times(1)).deleteById(employeeId);
     }
@@ -241,8 +178,7 @@ public class EmployeeServiceTest {
             employeeService.deleteEmployee(employeeId);
         });
 
-        assertEquals("Employee with ID " + employeeId + " was not found.", exception.getMessage());
-
+        assertEmployeeNotFoundException(exception, employeeId);
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(employeeRepository, never()).deleteById(employeeId);
     }
@@ -251,13 +187,9 @@ public class EmployeeServiceTest {
     public void testGetServicesByEmployee() {
 
         Long employeeId = 1L;
-        Employee employee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-
-        Set<Service> expectedServices = new HashSet<>(List.of(
-                new Service("Manichiura", "Serviciu bun", new BigDecimal(100), 60),
-                new Service("Renovare unghii", "Serviciu excelent", new BigDecimal(140), 80)));
-
+        Employee employee = createEmployee();
+        Set<Service> expectedServices = new HashSet<>(
+                List.of(ServiceServiceTest.createService(), ServiceServiceTest.createOtherService()));
         employee.setServices(expectedServices);
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
@@ -273,11 +205,9 @@ public class EmployeeServiceTest {
     public void testAddServiceToEmployee() {
 
         Long employeeId = 1L;
-        Employee employee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-
         Long serviceId = 1L;
-        Service service = new Service("Manichiura", "Serviciu bun", new BigDecimal(100), 60);
+        Employee employee = createEmployee();
+        Service service = ServiceServiceTest.createService();
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
         when(serviceRepository.findById(serviceId)).thenReturn(Optional.of(service));
@@ -286,21 +216,17 @@ public class EmployeeServiceTest {
         Employee result = employeeService.addServiceToEmployee(serviceId, employeeId);
 
         assertTrue(result.getServices().contains(service));
-
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(serviceRepository, times(1)).findById(serviceId);
         verify(employeeRepository, times(1)).save(employee);
-
     }
 
     @Test
     public void testAddServiceToEmployeeServiceNotFound() {
 
         Long employeeId = 1L;
-        Employee employee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-
         Long serviceId = 1L;
+        Employee employee = createEmployee();
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
         when(serviceRepository.findById(serviceId)).thenReturn(Optional.empty());
@@ -309,24 +235,20 @@ public class EmployeeServiceTest {
             employeeService.addServiceToEmployee(serviceId, employeeId);
         });
 
-        assertEquals("Service with ID " + serviceId + " was not found.", exception.getMessage());
+        ServiceServiceTest.assertServiceNotFoundException(exception, serviceId);
 
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(serviceRepository, times(1)).findById(serviceId);
         verify(employeeRepository, never()).save(employee);
-
     }
 
     @Test
     public void testDeleteServiceFromEmployee() {
 
         Long employeeId = 1L;
-        Employee employee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-
         Long serviceId = 1L;
-        Service service = new Service("Manichiura", "Serviciu bun", new BigDecimal(100), 60);
-
+        Employee employee = createEmployee();
+        Service service = ServiceServiceTest.createService();
         employee.getServices().add(service);
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
@@ -336,7 +258,6 @@ public class EmployeeServiceTest {
         employeeService.deleteServiceFromEmployee(serviceId, employeeId);
 
         assertFalse(employee.getServices().contains(service));
-
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(serviceRepository, times(1)).findById(serviceId);
         verify(employeeRepository, times(1)).save(employee);
@@ -347,10 +268,8 @@ public class EmployeeServiceTest {
     public void testDeleteServiceFromEmployeeServiceNotFound() {
 
         Long employeeId = 1L;
-        Employee employee = new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
-                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
-
         Long serviceId = 1L;
+        Employee employee = createEmployee();
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
         when(serviceRepository.findById(serviceId)).thenReturn(Optional.empty());
@@ -359,12 +278,44 @@ public class EmployeeServiceTest {
             employeeService.deleteServiceFromEmployee(serviceId, employeeId);
         });
 
-        assertEquals("Service with ID " + serviceId + " was not found.", exception.getMessage());
-
+        ServiceServiceTest.assertServiceNotFoundException(exception, serviceId);
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(serviceRepository, times(1)).findById(serviceId);
         verify(employeeRepository, never()).save(employee);
+    }
 
+    public void assertFullResult(Employee result) {
+        assertNotNull(result);
+        assertEquals("Catalina", result.getFirstName());
+        assertEquals("Vasiu", result.getLastName());
+        assertEquals("cata@gmail.com", result.getEmail());
+        assertEquals("+4071xxxxxxx", result.getPhoneNumber());
+        assertEquals("Str. Anonim Nr. 0", result.getAddress());
+        assertEquals(LocalDate.of(2000, 1, 1), result.getBirthDate());
+        assertEquals("Manichiurista", result.getSpecialization());
+        assertEquals("employee", result.getRole());
+        assertEquals(new BigDecimal(5000), result.getSalary());
+    }
+
+    public static void assertEmployeeNotFoundException(EmployeeNotFoundException exception, Long clientId) {
+        EmployeeNotFoundException expected = new EmployeeNotFoundException(clientId);
+        assertEquals(expected.getMessage(), exception.getMessage());
+    }
+
+    public static void assertEmployeeAlreadyExistsException(EmployeeAlreadyExistsException exception,
+            String uniqueFieldName) {
+        EmployeeAlreadyExistsException expected = new EmployeeAlreadyExistsException(uniqueFieldName);
+        assertEquals(expected.getMessage(), exception.getMessage());
+    }
+
+    public static Employee createEmployee() {
+        return new Employee("Catalina", "Vasiu", "cata@gmail.com", "+4071xxxxxxx", "Str. Anonim Nr. 0",
+                LocalDate.of(2000, 1, 1), "Manichiurista", new BigDecimal(5000));
+    }
+
+    public static Employee createOtherEmployee() {
+        return new Employee("Prenume", "Nume", "nume@gmail.com", "+4072xxxxxxx", "Str. Random Nr. 1",
+                LocalDate.of(2001, 2, 2), "Specializare", new BigDecimal(2000));
     }
 
 }

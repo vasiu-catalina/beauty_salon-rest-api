@@ -1,5 +1,6 @@
 package com.vasiu_catalina.beauty_salon.entity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.format.annotation.NumberFormat;
@@ -87,7 +88,7 @@ public class Service {
     @JsonIgnore
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "service_products", joinColumns = @JoinColumn(name = "service_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"))
-    private Set<Product> products;
+    private Set<Product> products = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

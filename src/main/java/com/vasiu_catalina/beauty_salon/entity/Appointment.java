@@ -1,7 +1,7 @@
 package com.vasiu_catalina.beauty_salon.entity;
 
 import java.util.Set;
-
+import java.util.HashSet;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,6 +21,7 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Future;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -35,6 +36,7 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Appointment {
 
     @Id
@@ -59,7 +61,7 @@ public class Appointment {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "appointment", cascade =  CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Set<AppointmentService> services;
+    private Set<AppointmentService> services = new HashSet<>();
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = true)

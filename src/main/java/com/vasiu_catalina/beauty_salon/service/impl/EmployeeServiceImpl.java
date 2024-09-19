@@ -108,6 +108,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
         employeeRepository.save(employee);
     }
 
+    @Override
+    public Employee getEmployeeByEmail(String email) {
+        Optional<Employee> existingEmployeeByEmail = employeeRepository.findByEmail(email);
+        return unwrappedEmployeeWithPassword(existingEmployeeByEmail, null);
+    }
+
     private boolean existsEmployeeByEmail(String email) {
         Optional<Employee> existingEmployeeByEmail = employeeRepository.findByEmail(email);
         return existingEmployeeByEmail.isPresent();
@@ -124,8 +130,18 @@ public class EmployeeServiceImpl implements IEmployeeService {
     }
 
     static Employee unwrappedEmployee(Optional<Employee> employee, Long id) {
+        if (employee.isPresent()) {
+            Employee existing = employee.get();
+            existing.setPassword(null);
+            return existing;
+        }
+        throw new EmployeeNotFoundException(id);
+    }
+
+    static Employee unwrappedEmployeeWithPassword(Optional<Employee> employee, Long id) {
         if (employee.isPresent())
             return employee.get();
         throw new EmployeeNotFoundException(id);
     }
+
 }

@@ -30,6 +30,7 @@ import com.vasiu_catalina.beauty_salon.exception.employee.*;
 import com.vasiu_catalina.beauty_salon.exception.product.*;
 import com.vasiu_catalina.beauty_salon.exception.review.*;
 import com.vasiu_catalina.beauty_salon.exception.service.*;
+import com.vasiu_catalina.beauty_salon.security.exception.PasswordsDontMatchException;
 
 @ControllerAdvice
 public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
@@ -84,7 +85,8 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
             ProductNotFoundException.class,
             ReviewNotFoundException.class,
             ServiceNotFoundException.class,
-            ProductNotFoundForServiceException.class
+            ProductNotFoundForServiceException.class,
+            PasswordsDontMatchException.class
     })
     public ResponseEntity<Object> handleResourceNotFoundException(RuntimeException ex) {
 

@@ -18,6 +18,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -53,6 +54,14 @@ public class Client {
     @NotBlank(message = "Email is required.")
     @Column(nullable = false, unique = true)
     private String email;
+
+    @NotBlank(message = "Password is required.")
+    @Column(nullable = false)
+    private String password;
+
+    @Transient
+    @NotBlank(message = "Password confirm is required.")
+    private String confirmPassword;
 
     @NonNull
     @NotBlank(message = "Phone number is required.")

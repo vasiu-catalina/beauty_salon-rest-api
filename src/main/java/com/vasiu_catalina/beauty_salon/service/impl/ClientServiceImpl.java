@@ -76,6 +76,12 @@ public class ClientServiceImpl implements IClientService {
         clientRepository.deleteById(id);
     }
 
+    @Override
+    public Client getClientByEmail(String email) {
+        Optional<Client> client = clientRepository.findByEmail(email);
+        return unwrappedClientWithPassword(client, null);
+    }
+
     private boolean existsClientByEmail(String email) {
         Optional<Client> existingClientByEmail = clientRepository.findByEmail(email);
         return existingClientByEmail.isPresent();
@@ -87,8 +93,19 @@ public class ClientServiceImpl implements IClientService {
     }
 
     static Client unwrappedClient(Optional<Client> client, Long id) {
-        if (client.isPresent())
-            return client.get();
+        if (client.isPresent()) {
+            Client existing = client.get();
+            existing.setPassword(null);
+            return existing;
+        }
         throw new ClientNotFoundException(id);
     }
+
+    static Client unwrappedClientWithPassword(Optional<Client> client, Long id) {
+        if (client.isPresent()) {
+            return client.get();
+        }
+        throw new ClientNotFoundException(id);
+    }
+
 }

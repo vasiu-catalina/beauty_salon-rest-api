@@ -12,6 +12,8 @@ public interface IEmployeeService {
 
     Employee getEmployee(Long id);
 
+    Employee getEmployeeByEmail(String email);
+
     Employee createEmployee(Employee employee);
 
     Employee updateEmployee(Long id, Employee employee);

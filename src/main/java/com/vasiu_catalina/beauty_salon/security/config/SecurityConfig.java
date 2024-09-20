@@ -38,7 +38,7 @@ public class SecurityConfig {
 				clientAuthenticationManager, securityService);
 		EmployeeAuthenticationFilter employeeAuthenticationFilter = new EmployeeAuthenticationFilter(
 				employeeAuthenticationManager, securityService);
-				
+
 		JWTAuthorizationFilter jwtAuthorizationFilter = new JWTAuthorizationFilter(securityService);
 
 		clientAuthenticationFilter.setFilterProcessesUrl(securityService.getClientLoginPath());
@@ -52,6 +52,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, securityService.getEmployeeRegisterPath()).permitAll()
 						.requestMatchers(HttpMethod.POST, securityService.getEmployeeLoginPath()).permitAll()
 						.requestMatchers(HttpMethod.POST, securityService.getLogoutPath()).permitAll()
+						.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 						.anyRequest().authenticated())
 				.addFilterBefore(new ExceptionHandlerFilter(),
 						UsernamePasswordAuthenticationFilter.class)

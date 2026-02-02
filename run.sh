@@ -13,6 +13,7 @@ Options:
   -t, --test      Run tests (mvn test)
   -b, --build     Build the project (mvn clean package)
   -r, --run       Run the app (mvn spring-boot:run)
+  --coverage      Run tests with JaCoCo report (mvn test)
   -h, --help      Show this help
 
 If no options are provided, the app is run (same as --run).
@@ -25,6 +26,7 @@ do_compile=false
 do_test=false
 do_build=false
 do_run=false
+do_coverage=false
 
 if [[ $# -eq 0 ]]; then
   do_run=true
@@ -35,6 +37,7 @@ else
       -t|--test) do_test=true ;;
       -b|--build) do_build=true ;;
       -r|--run) do_run=true ;;
+      --coverage) do_coverage=true ;;
       -h|--help)
         show_help
         exit 0
@@ -56,6 +59,11 @@ fi
 
 if [[ "$do_test" == "true" ]]; then
   "$MVN" test
+fi
+
+if [[ "$do_coverage" == "true" ]]; then
+  "$MVN" test
+  echo "JaCoCo report: ${SCRIPT_DIR}/target/site/jacoco/index.html"
 fi
 
 if [[ "$do_build" == "true" ]]; then

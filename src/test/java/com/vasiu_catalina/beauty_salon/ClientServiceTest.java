@@ -1,8 +1,8 @@
 package com.vasiu_catalina.beauty_salon;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -13,11 +13,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.vasiu_catalina.beauty_salon.entity.Client;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientAlreadyExistsException;
@@ -25,7 +25,7 @@ import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.ClientRepository;
 import com.vasiu_catalina.beauty_salon.service.impl.ClientServiceImpl;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClientServiceTest {
 
     @Mock

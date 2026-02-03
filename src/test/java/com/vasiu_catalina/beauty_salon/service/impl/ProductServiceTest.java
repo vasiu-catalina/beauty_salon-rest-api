@@ -1,4 +1,4 @@
-package com.vasiu_catalina.beauty_salon;
+package com.vasiu_catalina.beauty_salon.service.impl;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -110,6 +110,16 @@ public class ProductServiceTest {
     }
 
     @Test
+    public void testGetProductWithNullId() {
+        ProductNotFoundException exception = assertThrows(ProductNotFoundException.class, () -> {
+            productService.getProduct(null);
+        });
+
+        assertProductNotFoundException(exception, null);
+        verify(productRepository, never()).findById(any(Long.class));
+    }
+
+    @Test
     public void testUpdateProduct() {
         Long productId = 1L;
         Product existingProduct = createOtherProduct();
@@ -123,6 +133,57 @@ public class ProductServiceTest {
         assertFullResult(result);
         verify(productRepository, times(1)).findById(productId);
         verify(productRepository, times(1)).save(existingProduct);
+    }
+
+    @Test
+    public void testUpdateProductWithSameNameSkipsDuplicateCheck() {
+        Long productId = 1L;
+        Product existingProduct = createProduct();
+        Product updatedProduct = createProduct();
+        updatedProduct.setPrice(new BigDecimal(350));
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(existingProduct);
+
+        Product result = productService.updateProduct(productId, updatedProduct);
+
+        assertEquals(new BigDecimal(350), result.getPrice());
+        verify(productRepository, never()).findByName(any(String.class));
+    }
+
+    @Test
+    public void testUpdateProductNameCaseInsensitive() {
+        Long productId = 1L;
+        Product existingProduct = new Product("Shampoo", new BigDecimal(100), LocalDate.of(2027, 1, 1));
+        Product updatedProduct = new Product("shampoo", new BigDecimal(150), LocalDate.of(2028, 1, 1));
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
+        when(productRepository.save(any(Product.class))).thenReturn(existingProduct);
+
+        Product result = productService.updateProduct(productId, updatedProduct);
+
+        assertEquals("shampoo", result.getName());
+        verify(productRepository, times(1)).findById(productId);
+        verify(productRepository, never()).findByName(any(String.class));
+    }
+
+    @Test
+    public void testUpdateProductNameAlreadyExists() {
+        Long productId = 1L;
+        Product existingProduct = createOtherProduct();
+        Product updatedProduct = createProduct();
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
+        when(productRepository.findByName(updatedProduct.getName())).thenReturn(Optional.of(updatedProduct));
+
+        ProductAlreadyExistsException exception = assertThrows(ProductAlreadyExistsException.class, () -> {
+            productService.updateProduct(productId, updatedProduct);
+        });
+
+        assertProductAlreadyExistsException(exception, updatedProduct.getName());
+        verify(productRepository, times(1)).findById(productId);
+        verify(productRepository, times(1)).findByName(updatedProduct.getName());
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test

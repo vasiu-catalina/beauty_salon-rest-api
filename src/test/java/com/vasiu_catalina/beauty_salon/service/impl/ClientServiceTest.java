@@ -1,4 +1,4 @@
-package com.vasiu_catalina.beauty_salon;
+package com.vasiu_catalina.beauty_salon.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -132,6 +132,60 @@ public class ClientServiceTest {
     }
 
     @Test
+    public void testUpdateClientEmailAlreadyExists() {
+        Long clientId = 1L;
+        Client existingClient = createOtherClient();
+        Client updatedClient = createClient();
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(existingClient));
+        when(clientRepository.findByEmail(updatedClient.getEmail())).thenReturn(Optional.of(updatedClient));
+
+        ClientAlreadyExistsException exception = assertThrows(ClientAlreadyExistsException.class, () -> {
+            clientService.updateClient(clientId, updatedClient);
+        });
+
+        assertClientAlreadyExistsException(exception, "Email");
+        verify(clientRepository, times(1)).findByEmail(updatedClient.getEmail());
+        verify(clientRepository, never()).save(any(Client.class));
+    }
+
+    @Test
+    public void testUpdateClientPhoneAlreadyExists() {
+        Long clientId = 1L;
+        Client existingClient = createOtherClient();
+        Client updatedClient = createClient();
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(existingClient));
+        when(clientRepository.findByEmail(updatedClient.getEmail())).thenReturn(Optional.empty());
+        when(clientRepository.findByPhoneNumber(updatedClient.getPhoneNumber())).thenReturn(Optional.of(updatedClient));
+
+        ClientAlreadyExistsException exception = assertThrows(ClientAlreadyExistsException.class, () -> {
+            clientService.updateClient(clientId, updatedClient);
+        });
+
+        assertClientAlreadyExistsException(exception, "Phone number");
+        verify(clientRepository, times(1)).findByPhoneNumber(updatedClient.getPhoneNumber());
+        verify(clientRepository, never()).save(any(Client.class));
+    }
+
+    @Test
+    public void testUpdateClientWithSameEmailSkipsUniquenessChecks() {
+        Long clientId = 1L;
+        Client existingClient = createClient();
+        Client updatedClient = createClient();
+        updatedClient.setFirstName("Updated");
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(existingClient));
+        when(clientRepository.save(any(Client.class))).thenReturn(existingClient);
+
+        Client result = clientService.updateClient(clientId, updatedClient);
+
+        assertEquals("Updated", result.getFirstName());
+        verify(clientRepository, never()).findByEmail(any(String.class));
+        verify(clientRepository, never()).findByPhoneNumber(any(String.class));
+    }
+
+    @Test
     public void testUpdateClientNotFound() {
         Long clientId = 1L;
         Client updatedClient = createClient();
@@ -145,6 +199,28 @@ public class ClientServiceTest {
         assertClientNotFoundException(exception, clientId);
         verify(clientRepository, times(1)).findById(clientId);
         verify(clientRepository, never()).save(any(Client.class));
+    }
+
+    @Test
+    public void testGetClientByEmail() {
+        Client client = createClient();
+        when(clientRepository.findByEmail(client.getEmail())).thenReturn(Optional.of(client));
+
+        Client result = clientService.getClientByEmail(client.getEmail());
+
+        assertEquals(client, result);
+        verify(clientRepository, times(1)).findByEmail(client.getEmail());
+    }
+
+    @Test
+    public void testGetClientByEmailNotFound() {
+        when(clientRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+        ClientNotFoundException exception = assertThrows(ClientNotFoundException.class, () -> {
+            clientService.getClientByEmail("missing@example.com");
+        });
+
+        assertClientNotFoundException(exception, null);
     }
 
     @Test

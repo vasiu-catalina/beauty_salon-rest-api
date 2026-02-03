@@ -1,10 +1,12 @@
-package com.vasiu_catalina.beauty_salon;
+package com.vasiu_catalina.beauty_salon.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,10 +26,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.vasiu_catalina.beauty_salon.entity.Appointment;
 import com.vasiu_catalina.beauty_salon.entity.Client;
 import com.vasiu_catalina.beauty_salon.entity.Employee;
+import com.vasiu_catalina.beauty_salon.entity.AppointmentService;
+import com.vasiu_catalina.beauty_salon.entity.Service;
 import com.vasiu_catalina.beauty_salon.exception.appointment.AppointmentAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.appointment.AppointmentNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.client.ClientNotFoundException;
 import com.vasiu_catalina.beauty_salon.exception.employee.EmployeeNotFoundException;
+import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.AppointmentRepository;
 import com.vasiu_catalina.beauty_salon.repository.ClientRepository;
 import com.vasiu_catalina.beauty_salon.repository.EmployeeRepository;
@@ -85,6 +90,61 @@ public class AppointmentServiceTest {
         verify(appointmentRepository, times(1)).save(appointment);
     }
 
+    @Test
+    public void testCreateAppointmentWithServicesCalculatesTotalPrice() {
+        Long clientId = 1L;
+        Long employeeId = 1L;
+        Appointment appointment = createAppointmentWithServiceIds(10L, 20L);
+
+        Client client = ClientServiceTest.createClient();
+        Employee employee = EmployeeServiceTest.createEmployee();
+
+        Service serviceA = new Service();
+        serviceA.setId(10L);
+        serviceA.setPrice(new BigDecimal(50));
+
+        Service serviceB = new Service();
+        serviceB.setId(20L);
+        serviceB.setPrice(new BigDecimal(70));
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(appointmentRepository.existsByClientIdAndDate(clientId, appointment.getDate())).thenReturn(false);
+        when(appointmentRepository.existsByEmployeeIdAndDate(employeeId, appointment.getDate())).thenReturn(false);
+        when(serviceRepository.findById(10L)).thenReturn(Optional.of(serviceA));
+        when(serviceRepository.findById(20L)).thenReturn(Optional.of(serviceB));
+        when(appointmentRepository.save(any(Appointment.class))).thenReturn(appointment);
+
+        Appointment result = appointmentService.createAppointment(clientId, employeeId, appointment);
+
+        assertEquals(new BigDecimal(120), result.getTotalPrice());
+        assertEquals(2, result.getServices().size());
+        verify(appointmentRepository, times(1)).save(appointment);
+    }
+
+    @Test
+    public void testCreateAppointmentServiceNotFound() {
+        Long clientId = 1L;
+        Long employeeId = 1L;
+        Appointment appointment = createAppointmentWithServiceIds(10L);
+
+        Client client = ClientServiceTest.createClient();
+        Employee employee = EmployeeServiceTest.createEmployee();
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
+        when(appointmentRepository.existsByClientIdAndDate(clientId, appointment.getDate())).thenReturn(false);
+        when(appointmentRepository.existsByEmployeeIdAndDate(employeeId, appointment.getDate())).thenReturn(false);
+        when(serviceRepository.findById(10L)).thenReturn(Optional.empty());
+
+        ServiceNotFoundException exception = assertThrows(ServiceNotFoundException.class, () -> {
+            appointmentService.createAppointment(clientId, employeeId, appointment);
+        });
+
+        ServiceNotFoundException expected = new ServiceNotFoundException(10L);
+        assertEquals(expected.getMessage(), exception.getMessage());
+        verify(appointmentRepository, never()).save(any(Appointment.class));
+    }
     @Test
     public void testcreateAppointmentClientNotFoundException() {
 
@@ -244,6 +304,71 @@ public class AppointmentServiceTest {
         assertFullResult(result);
         verify(appointmentRepository, times(1)).save(appointment);
 
+    }
+
+    @Test
+    public void updateAppointmentReplacesServicesAndTotals() {
+        Long clientId = 1L;
+        Long employeeId = 1L;
+        LocalDateTime date = LocalDateTime.of(2025, 10, 1, 10, 0, 0);
+
+        Appointment existingAppointment = createAppointment();
+        existingAppointment.setDate(date);
+        Set<AppointmentService> existingServices = new HashSet<>();
+        AppointmentService existingService = new AppointmentService(new BigDecimal(30));
+        Service service = new Service();
+        service.setId(1L);
+        service.setPrice(new BigDecimal(30));
+        existingService.setService(service);
+        existingServices.add(existingService);
+        existingAppointment.setServices(existingServices);
+
+        Appointment updatedAppointment = createAppointmentWithServiceIds(2L, 3L);
+        updatedAppointment.setDate(date);
+
+        Service serviceA = new Service();
+        serviceA.setId(2L);
+        serviceA.setPrice(new BigDecimal(40));
+
+        Service serviceB = new Service();
+        serviceB.setId(3L);
+        serviceB.setPrice(new BigDecimal(60));
+
+        when(appointmentRepository.findByClientIdAndEmployeeIdAndDate(clientId, employeeId, date))
+                .thenReturn(Optional.of(existingAppointment));
+        when(serviceRepository.findById(2L)).thenReturn(Optional.of(serviceA));
+        when(serviceRepository.findById(3L)).thenReturn(Optional.of(serviceB));
+        when(appointmentRepository.save(existingAppointment)).thenReturn(existingAppointment);
+
+        Appointment result = appointmentService.updateAppointment(clientId, employeeId, date, updatedAppointment);
+
+        assertEquals(new BigDecimal(100), result.getTotalPrice());
+        assertEquals(2, result.getServices().size());
+        verify(appointmentRepository, times(1)).save(existingAppointment);
+    }
+
+    @Test
+    public void updateAppointmentServiceNotFound() {
+        Long clientId = 1L;
+        Long employeeId = 1L;
+        LocalDateTime date = LocalDateTime.of(2025, 10, 1, 10, 0, 0);
+
+        Appointment existingAppointment = createAppointment();
+        existingAppointment.setDate(date);
+        Appointment updatedAppointment = createAppointmentWithServiceIds(2L);
+        updatedAppointment.setDate(date);
+
+        when(appointmentRepository.findByClientIdAndEmployeeIdAndDate(clientId, employeeId, date))
+                .thenReturn(Optional.of(existingAppointment));
+        when(serviceRepository.findById(2L)).thenReturn(Optional.empty());
+
+        ServiceNotFoundException exception = assertThrows(ServiceNotFoundException.class, () -> {
+            appointmentService.updateAppointment(clientId, employeeId, date, updatedAppointment);
+        });
+
+        ServiceNotFoundException expected = new ServiceNotFoundException(2L);
+        assertEquals(expected.getMessage(), exception.getMessage());
+        verify(appointmentRepository, never()).save(existingAppointment);
     }
 
     @Test
@@ -420,6 +545,20 @@ public class AppointmentServiceTest {
 
     public static Appointment createOtherAppointment() {
         return new Appointment(LocalDateTime.of(2025, 10, 2, 15, 0, 0), new BigDecimal(0));
+    }
+
+    private Appointment createAppointmentWithServiceIds(Long... serviceIds) {
+        Appointment appointment = createAppointment();
+        Set<AppointmentService> services = new HashSet<>();
+        for (Long serviceId : serviceIds) {
+            Service service = new Service();
+            service.setId(serviceId);
+            AppointmentService appointmentService = new AppointmentService(BigDecimal.ZERO);
+            appointmentService.setService(service);
+            services.add(appointmentService);
+        }
+        appointment.setServices(services);
+        return appointment;
     }
 
 }

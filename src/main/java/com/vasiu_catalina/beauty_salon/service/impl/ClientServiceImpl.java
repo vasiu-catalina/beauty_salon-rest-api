@@ -54,7 +54,7 @@ public class ClientServiceImpl implements IClientService {
             existingClient.setEmail(client.getEmail());
         }
 
-        if (!existingClient.getEmail().equals(client.getEmail())) {
+        if (!existingClient.getPhoneNumber().equals(client.getPhoneNumber())) {
 
             if (existsClientByPhoneNumber(client.getPhoneNumber()))
                 throw new ClientAlreadyExistsException("Phone number");

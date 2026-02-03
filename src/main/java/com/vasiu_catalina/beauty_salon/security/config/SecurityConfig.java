@@ -52,6 +52,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.POST, securityService.getEmployeeRegisterPath()).permitAll()
 						.requestMatchers(HttpMethod.POST, securityService.getEmployeeLoginPath()).permitAll()
 						.requestMatchers(HttpMethod.POST, securityService.getLogoutPath()).permitAll()
+						.requestMatchers("/api/v1/health", "/api/v1/health/**").permitAll()
 						.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 						.anyRequest().authenticated())
 				.addFilterBefore(new ExceptionHandlerFilter(),

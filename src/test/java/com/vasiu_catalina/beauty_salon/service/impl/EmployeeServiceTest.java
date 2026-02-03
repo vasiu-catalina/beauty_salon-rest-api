@@ -1,4 +1,4 @@
-package com.vasiu_catalina.beauty_salon;
+package com.vasiu_catalina.beauty_salon.service.impl;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -140,6 +140,60 @@ public class EmployeeServiceTest {
     }
 
     @Test
+    public void testUpdateEmployeeEmailAlreadyExists() {
+        Long employeeId = 1L;
+        Employee existingEmployee = createOtherEmployee();
+        Employee updatedEmployee = createEmployee();
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.findByEmail(updatedEmployee.getEmail())).thenReturn(Optional.of(updatedEmployee));
+
+        EmployeeAlreadyExistsException exception = assertThrows(EmployeeAlreadyExistsException.class, () -> {
+            employeeService.updateEmployee(employeeId, updatedEmployee);
+        });
+
+        assertEmployeeAlreadyExistsException(exception, "Email");
+        verify(employeeRepository, times(1)).findByEmail(updatedEmployee.getEmail());
+        verify(employeeRepository, never()).save(any(Employee.class));
+    }
+
+    @Test
+    public void testUpdateEmployeePhoneAlreadyExists() {
+        Long employeeId = 1L;
+        Employee existingEmployee = createOtherEmployee();
+        Employee updatedEmployee = createEmployee();
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.findByEmail(updatedEmployee.getEmail())).thenReturn(Optional.empty());
+        when(employeeRepository.findByPhoneNumber(updatedEmployee.getPhoneNumber())).thenReturn(Optional.of(updatedEmployee));
+
+        EmployeeAlreadyExistsException exception = assertThrows(EmployeeAlreadyExistsException.class, () -> {
+            employeeService.updateEmployee(employeeId, updatedEmployee);
+        });
+
+        assertEmployeeAlreadyExistsException(exception, "Phone number");
+        verify(employeeRepository, times(1)).findByPhoneNumber(updatedEmployee.getPhoneNumber());
+        verify(employeeRepository, never()).save(any(Employee.class));
+    }
+
+    @Test
+    public void testUpdateEmployeeWithSameEmailSkipsUniquenessChecks() {
+        Long employeeId = 1L;
+        Employee existingEmployee = createEmployee();
+        Employee updatedEmployee = createEmployee();
+        updatedEmployee.setFirstName("Updated");
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
+        when(employeeRepository.save(any(Employee.class))).thenReturn(existingEmployee);
+
+        Employee result = employeeService.updateEmployee(employeeId, updatedEmployee);
+
+        assertEquals("Updated", result.getFirstName());
+        verify(employeeRepository, never()).findByEmail(any(String.class));
+        verify(employeeRepository, never()).findByPhoneNumber(any(String.class));
+    }
+
+    @Test
     public void testUpdateEmployeeNotFound() {
         Long employeeId = 1L;
         Employee updatedEmployee = createEmployee();
@@ -153,6 +207,28 @@ public class EmployeeServiceTest {
         assertEmployeeNotFoundException(exception, employeeId);
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(employeeRepository, never()).save(any(Employee.class));
+    }
+
+    @Test
+    public void testGetEmployeeByEmail() {
+        Employee employee = createEmployee();
+        when(employeeRepository.findByEmail(employee.getEmail())).thenReturn(Optional.of(employee));
+
+        Employee result = employeeService.getEmployeeByEmail(employee.getEmail());
+
+        assertEquals(employee, result);
+        verify(employeeRepository, times(1)).findByEmail(employee.getEmail());
+    }
+
+    @Test
+    public void testGetEmployeeByEmailNotFound() {
+        when(employeeRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+        EmployeeNotFoundException exception = assertThrows(EmployeeNotFoundException.class, () -> {
+            employeeService.getEmployeeByEmail("missing@example.com");
+        });
+
+        assertEmployeeNotFoundException(exception, null);
     }
 
     @Test

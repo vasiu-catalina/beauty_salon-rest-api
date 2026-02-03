@@ -57,7 +57,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             existingemployee.setEmail(employee.getEmail());
         }
 
-        if (!existingemployee.getEmail().equals(employee.getEmail())) {
+        if (!existingemployee.getPhoneNumber().equals(employee.getPhoneNumber())) {
 
             if (existsEmployeeByPhoneNumber(employee.getPhoneNumber()))
                 throw new EmployeeAlreadyExistsException("Phone number");

@@ -1,4 +1,4 @@
-package com.vasiu_catalina.beauty_salon;
+package com.vasiu_catalina.beauty_salon.service.impl;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -24,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.vasiu_catalina.beauty_salon.entity.Employee;
 import com.vasiu_catalina.beauty_salon.entity.Product;
 import com.vasiu_catalina.beauty_salon.entity.Service;
+import com.vasiu_catalina.beauty_salon.exception.service.ProductAlreadyAddedToServiceException;
+import com.vasiu_catalina.beauty_salon.exception.service.ProductNotFoundForServiceException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceAlreadyExistsException;
 import com.vasiu_catalina.beauty_salon.exception.service.ServiceNotFoundException;
 import com.vasiu_catalina.beauty_salon.repository.ProductRepository;
@@ -127,6 +129,43 @@ public class ServiceServiceTest {
     }
 
     @Test
+    public void testUpdateServiceWhenNameUnchanged() {
+        Long serviceId = 1L;
+        Service service = createService();
+        Service updatedService = createService();
+        updatedService.setDescription("Updated description");
+
+        this.whenFindById(serviceId, service);
+        when(serviceRepository.save(any(Service.class))).thenReturn(service);
+
+        Service result = serviceService.updateService(serviceId, updatedService);
+
+        assertEquals("Unghii", result.getName());
+        verify(serviceRepository, times(1)).findById(serviceId);
+        verify(serviceRepository, never()).findByName(any(String.class));
+        verify(serviceRepository, times(1)).save(service);
+    }
+
+    @Test
+    public void testUpdateServiceNameAlreadyExists() {
+        Long serviceId = 1L;
+        Service service = createOtherService();
+        Service updatedService = createService();
+
+        this.whenFindById(serviceId, service);
+        when(serviceRepository.findByName(updatedService.getName())).thenReturn(Optional.of(updatedService));
+
+        ServiceAlreadyExistsException exception = assertThrows(ServiceAlreadyExistsException.class, () -> {
+            serviceService.updateService(serviceId, updatedService);
+        });
+
+        ServiceAlreadyExistsException expectedException = new ServiceAlreadyExistsException(updatedService.getName());
+        assertEquals(expectedException.getMessage(), exception.getMessage());
+        verify(serviceRepository, times(1)).findByName(updatedService.getName());
+        verify(serviceRepository, never()).save(any(Service.class));
+    }
+
+    @Test
     public void testUpdateServiceNotFound() {
 
         Long serviceId = 1L;
@@ -218,6 +257,25 @@ public class ServiceServiceTest {
     }
 
     @Test
+    public void testAddProductToServiceAlreadyAdded() {
+        Long productId = 1L, serviceId = 1L;
+        Product product = ProductServiceTest.createProduct();
+        Service service = createService();
+        service.getProducts().add(product);
+
+        whenFindById(serviceId, service);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+
+        ProductAlreadyAddedToServiceException exception = assertThrows(ProductAlreadyAddedToServiceException.class,
+                () -> serviceService.addProductToService(productId, serviceId));
+
+        ProductAlreadyAddedToServiceException expected = new ProductAlreadyAddedToServiceException(product.getName(),
+                service.getName());
+        assertEquals(expected.getMessage(), exception.getMessage());
+        verify(serviceRepository, never()).save(any(Service.class));
+    }
+
+    @Test
     public void testDeleteProductFromService() {
 
         Long productId = 1L, serviceId = 1L;
@@ -233,6 +291,24 @@ public class ServiceServiceTest {
         assertEquals(new HashSet<>(), service.getProducts());
         verify(serviceRepository, times(1)).save(service);
 
+    }
+
+    @Test
+    public void testDeleteProductFromServiceNotFound() {
+        Long productId = 1L, serviceId = 1L;
+        Product product = ProductServiceTest.createProduct();
+        Service service = createService();
+
+        whenFindById(serviceId, service);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+
+        ProductNotFoundForServiceException exception = assertThrows(ProductNotFoundForServiceException.class,
+                () -> serviceService.deleteProductFromService(productId, serviceId));
+
+        ProductNotFoundForServiceException expected = new ProductNotFoundForServiceException(product.getName(),
+                service.getName());
+        assertEquals(expected.getMessage(), exception.getMessage());
+        verify(serviceRepository, never()).save(any(Service.class));
     }
 
     private void whenFindById(Long serviceId, Service service) {

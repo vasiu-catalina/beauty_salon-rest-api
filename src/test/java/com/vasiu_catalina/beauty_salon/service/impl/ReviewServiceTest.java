@@ -1,4 +1,4 @@
-package com.vasiu_catalina.beauty_salon;
+package com.vasiu_catalina.beauty_salon.service.impl;
 
 import java.util.List;
 import java.util.Set;

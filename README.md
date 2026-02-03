@@ -5,6 +5,9 @@ REST API for managing a beauty salon: clients, employees, services/products, app
 **Database Diagram**
 ![Database Diagram](assets/images/database-diagramm.svg)
 
+**Coverage (99%)**
+![Coverage 99%](assets/images/jacoco-result.png)
+
 **Public Health Endpoint**
 - `GET /api/v1/health` → `{ "status": "UP", "timestamp": "..." }`
 
